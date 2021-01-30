@@ -21,6 +21,7 @@ data.append(5)
 print(data)
 print(list(data)) # 리스트 자료형으로 변환
 """
+결과값
 deque([1,2,3,4,5])
 [1,2,3,4,5]
 """
@@ -47,6 +48,7 @@ print(dict(counter))    # dictionary로 변환
 
 - Counter를 이용한 연산
     - 산술/집합 연산이 가능하다.
+    
 - 사용 예제 (`+`, `-`)
 ```python
 import collections
@@ -59,10 +61,25 @@ print(b)
 print(a+b)
 print(a-b)
 '''
-결과
+결과값
 Counter({'a': 2, 'b': 2, 'c': 2, 'd': 2})
 Counter({'b': 3, 'a': 1, 'c': 1, 'e': 1})
 Counter({'b': 5, 'a': 3, 'c': 3, 'd': 2, 'e': 1})
 Counter({'d': 2, 'a': 1, 'c': 1})
+'''
+```
+- 사용 예제(교집합(`&`) 과 합집합(`|`)
+```python
+import collections
+
+a = collections.Counter('aabbccdd')
+b = collections.Counter('aabbbce')
+
+print(a & b)
+print(a | b)
+'''
+결과
+Counter({'b': 2, 'a': 2, 'c': 1})
+Counter({'b': 3, 'c': 2, 'd': 2, 'a': 2, 'e': 1})
 '''
 ```
