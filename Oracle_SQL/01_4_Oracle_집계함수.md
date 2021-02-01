@@ -39,42 +39,103 @@ select  extract(year from hire_date) "year",
 from    emp
 group by extract(year from hire_date)
 order by 1 asc;
+---------------------------------------------------------------------------
+## 급여(salary) 범위별 직원수를 출력. 급여 범위는 10000 미만,  10000이상 두 범주.
+select  case when salary >= 10000 then '10000이상'
+              	     		  else '10000미만' end "급여범위",
+        count(*)
+from    emp
+group by case when salary >= 10000 then '10000이상'
+              else '10000미만' end;
+```
+#### 2. having 절(group의 조건을 넣어주는 구문)
+- group by 다음 위치
+- 그룹으로 나누것 중 (조건을 만족하는) 일부 그룹만 집계하고 싶을 때 사용
+- 구문
+    having 제약조건  -연산자는 **where**절의 연산자를 사용한다. 피연산자는 집계함수(의 결과)
+- where절은 그룹 함수를 사용 X
+- having절 사용예제
+```sql
+## 직원수가 10 이상인 부서의 부서명(dept_name)과 직원수를 조회
+select  dept_name,
+        count(*) "직원수",
+        sum(salary)
+from    emp
+group by dept_name
+having count(*) >= 10  -- where절에서는 집계함수 사용 못함
+order by 2 desc;
+--------------------------------------------------------------------------------------------------
+## 평균급여가 $5,000 이상이고 총급여가 $50,000 이상인 부서의 부서명(dept_name), 평균급여와 총급여를 조회
+select  dept_name,
+        round(avg(salary), 2),
+        sum(salary)
+from    emp
+group by dept_name
+having round(avg(salary), 2) >=5000 
+and sum(salary) >= 50000;
 ```
 
-#### 2. having 절
-- 집계결과에 대한 행 제약 조건
-- group by 다음 order by 전에 온다.
-- 구문
-    having 제약조건  --연산자는 where절의 연산자를 사용한다. 피연산자는 집계함수(의 결과)
-
-where절은 그룹 함수를 사용할 수 없다.
-
-
-
 #### 3. rollup : group by의 확장.
-  - 두개 이상의 컬럼을 group by로 묶은 경우 누적집계(중간집계나 총집계)를 부분 집계에 추가해서 조회한다.
+  - group by로 묶어 집계할 경우 누적집계(중간집계나 총집계)를 부분 집계에 추가해서 조회한다.
   - 구문 : group by rollup(컬럼명 [,컬럼명,..])
-
-
+- rollup 사용예제
+```sql
+## EMP 테이블에서 업무(job) 별 급여(salary)의 평균과 평균의 총계도 같이나오도록 조회.
+select job,
+        round(avg(salary), 2) "평균급여"
+from    emp
+group by rollup(job);
+--------------------------------------------------------------------------------
+## EMP 테이블에서 업무(JOB) 별 급여(salary)의 평균과 평균의 총계도 같이나오도록 조회.
+## 업무 컬럼에 소계나 총계이면 '총평균'을  일반 집계이면 업무(job)을 출력
+select  decode(grouping(job), 0,job, 
+                              1, '총평균') "job", 
+        round(avg(salary), 2) "평균"
+from    emp
+group by rollup(job);
+```
 #### 4. grouping(), grouping_id()
   - decode나 case구문이랑 같이 쓴다.
-  - rollup 이용한 집계시 컬럼이 각 행의 집계에 참여했는지 여부를 반환하는 함수.
+  - rollup 사용시 컬럼이 각 행의 집계에 참여했는지 여부를 반환하는 함수.
   - case/decode를 이용해 레이블을 붙여 가독성을 높일 수 있다.
   - 반환값
 	- 0 : 참여한 경우
 	- 1 : 참여 안한 경우.
  
-##### 4-1. rollup 사용시
+##### 4-1. rollup 사용시 (grouping() 함수)
 - grouping() 함수 
- - 구문: grouping(groupby컬럼)
+ - 구문: grouping(group by컬럼)
  - select 절에 사용되며 rollup이나 cube와 함께 사용해야 한다.
  - group by의 컬럼이 집계함수의 집계에 참여했는지 여부를 반환
 	- 반환값 0 : 참여함(부분집계함수 결과), 반환값 1: 참여 안함(누적집계의 결과)
  - 누적 집계인지 부분집계의 결과인지를 알려주는 알 수 있다.
 
 
-##### 4-2. rollup 사용시
+##### 4-2. rollup 사용시 (groupin_id() 함수)
 - grouping_id() 함수
-  - 구문: grouping_id(groupby 컬럼, ..)
+  - 구문: grouping_id(group by 컬럼, ..)
   - 전달한 컬럼이 집계에 사용되었는지 여부 2진수(0: 참여 안함, 1: 참여함)로 반환 한뒤 10진수로 변환해서 반환한다.
+  	- `0` : 전부 참여안함, `1` : 한개 참여, `3` : 두개 참여, `7` : 3개 참여 .....
+```sql
+## 총계/소계 행의 경우 :  총계는 '총계', 중간집계는 '계' 로 출력
+## 부서별(dept_name) 별 최대 salary와 최소 salary를 조회
+##      nvl(decode(group_id()))
+select  nvl(decode(grouping_id(dept_name), 1, '총계',
+                                           0, dept_name), '미배치') "dept_name",
+        max(salary),
+        min(salary)
+from    emp
+group by rollup(dept_name);
+---------------------------------------------------------------------------------------------
+## 부서별(dept_name), 입사년도별 평균 급여(salary) 조회. 부서별 집계와 총집계가 같이 나오도록 조회
+select  decode(grouping_id(dept_name, to_char(hire_date, 'yyyy')),
+                                       3, '총계',
+                                       1, dept_name|| ' 소계',
+                                       0, dept_name||'-'||to_char(hire_date, 'yyyy')) "Label",
+        to_char(hire_date, 'yyyy'),
+        round(avg(salary), 2) "평균급여"
+from    emp
+group by rollup(dept_name, to_char(hire_date, 'yyyy'))
+order by 1 asc;
 
+```
