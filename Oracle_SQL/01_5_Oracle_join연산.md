@@ -27,7 +27,89 @@
         - 오라클 전용 문법, 다른 DBMS는 지원안함.
 
 
-### 1. inner join : ANSI 조인 구문
-- FROM `테이블a` INNER JOIN `테이블b` ON 조인조건 (dustks)
+## 1. inner join : ANSI 조인 구문
+- FROM `테이블a` [별칭] INNER JOIN `테이블b` [별칭] ON 조인조건
 - `테이블a` == 소스테이블, `테이블b` == 타켓테이블
 - inner는 생략 할 수 있다.
+
+- inner join 사용예제
+```sql
+# 직원의 ID(emp.emp_id)가 100인 직원의 직원_ID(emp.emp_id), 이름(emp.emp_name), 입사년도(emp.hire_date), 소속부서이름(dept.dept_name)을 조회.
+select  e.emp_id,
+        e.emp_name,
+        to_char(e.hire_date, 'yyyy"년"') hire_year,
+        d.dept_name
+from    emp e inner join dept d on e.dept_id = d.dept_id
+# from    emp e join dept d on e.dept_id = d.dept_id -- inner는 생략 가능.
+where   e.emp_id = 100;
+
+# 부서별 급여(salary)의 평균을 조회. 부서이름(dept.dept_name)과 급여평균을 출력. 급여 평균이 높은 순서로 정렬.
+# 급여는 , 단위구분자와 $ 를 붙여 출력.
+select  d.dept_name,
+        to_char(round(avg(e.salary), 2), '$999,999.99') "avg_salary"
+from    emp e inner join dept d on e.dept_id = d.dept_id
+group by d.dept_id, d.dept_name # group by는 primary  key가 오는게 좋음
+order by 2 desc;
+
+# 부서별 급여등급이(salary_grade.grade) 1등급인 직원있는 부서이름(dept.dept_name)과 1등급인 직원수 조회. 직원수가 많은 부서 순서대로 정렬.
+## select, from, where, group by, order by 총 출동!
+select  d.dept_name,
+        count(s.grade),
+        s.grade||'등급'
+from    emp e inner join dept d on e.dept_id = d.dept_id
+                    join salary_grade s on e.salary between s.low_sal and s.high_sal
+where   s.grade = 1
+group by d.dept_name, s.grade
+order by count(s.grade) desc;
+```
+## 1-1. inner join : Oracle 조인 구문
+- Join할 테이블은 from절에 나열
+- Join 연산은 where절에서
+- Oracle Join 사용예제
+```sql
+# 200번대(200 ~ 299) 직원 ID(emp.emp_id)를 가진 직원들의 직원_ID(emp.emp_id), 이름(emp.emp_name), 급여(emp.salary), 
+# 소속부서이름(dept.dept_name), 부서위치(dept.loc)를 조회. 직원_ID의 오름차순으로 정렬.
+select  e.emp_id,
+        e.emp_name,
+        e.salary,
+        d.dept_name,
+        d.loc
+from    emp e, dept d
+where   e.dept_id = d.dept_id
+and     e.emp_id between 200 and 299
+order by e.emp_id asc;
+
+# 'Shipping' 부서의 부서명(dept.dept_name), 위치(dept.loc), 소속 직원의 이름(emp.emp_name), 업무명(job.job_title)을 조회. 
+# 직원이름 내림차순으로 정렬
+select  d.dept_name,
+        d.loc,
+        e.emp_name,
+        j.job_title
+from    dept d, emp e, job j
+where   d.dept_id = e.dept_id
+and     e.job_id = j.job_id
+and     d.dept_name = 'Shipping'
+order by e.emp_name desc;
+```
+## 1-2. Self join : Oracle 조인 구문
+- 하나의 테이블 안에 계층 관계를 이룰 때
+- 하나의 테이블을 둘로 나눈다.
+- 사용예제
+```sql
+# ANSI 사용
+# 직원의 ID(emp.emp_id), 이름(emp.emp_name), 상사이름(emp.emp_name)을 조회
+select  e1.emp_id,
+        e1.emp_name "직원이름",
+        e1.mgr_id "상사아이디",
+        e2.emp_name "상사이름"
+from    emp e1 join emp e2 on e1.mgr_id = e2.emp_id ; 
+# e1 : 부하직원 table, e2 : 상사 table
+
+# Oracle Join 사용
+select  e1.emp_id,
+        e1.emp_name "직원이름",
+        e1.mgr_id "상사아이디",
+        e2.emp_name "상사이름"
+from    emp e1, emp e2
+where   e1.mgr_id = e2.emp_id;
+```
