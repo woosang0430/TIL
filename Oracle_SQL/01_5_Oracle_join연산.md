@@ -1,4 +1,4 @@
-## JOIN 연산(INNER JOIN, ORACLE JOIN, OUTER JOIN)
+# JOIN 연산(INNER JOIN, ORACLE JOIN, OUTER JOIN)
 - 연관 있는 2개 이상의 테이블에 있는 컬럼들을 합쳐 가상의 테이블을 만들어 조회하는 방식
  	- **소스테이블** : 먼저 읽어야 한다고 생각하는 테이블 - 메인 데이터 테이블
 	- **타겟테이블** : 소스에 조인할 대상이 되는 테이블 - 추가정보, 부가정보
