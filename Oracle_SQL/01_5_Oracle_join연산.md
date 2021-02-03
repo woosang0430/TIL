@@ -113,3 +113,125 @@ select  e1.emp_id,
 from    emp e1, emp e2
 where   e1.mgr_id = e2.emp_id;
 ```
+
+## 2. Outer join
+- 소스 테이블의 행은 전부 붙힌다.
+- 타켓 테이블은 조인연산과 만족하지 않는 친구들은 null로 붙힌다.(만족하면 타켓 테이블 그래도)
+- 불충분 조인 (조인 연산시 한쪽의 행이 불충분 해도 붙이도록) 
+    - 소스(완전해야하는테이블)가 왼쪽이면 left join, 오른쪽이면 right join 양쪽이면 full outer join
+
+## 2-1. ANSI 문법(Outer Join 구문)
+- `from 테이블a [LEFT | RIGHT | FULL] OUTER JOIN 테이블b ON 조인조건`
+- 편한거 사용 ㄱㄱ 나는 left!
+- OUTER는 생략 가능.
+- ANSI Oracle join 사용 예제
+```sql
+# 모든 직원의 id(emp.emp_id), 이름(emp.emp_name), 부서_id(emp.dept_id)를 조회하는데
+# 부서_id가 80 인 직원들은 부서명(dept.dept_name)과 부서위치(dept.loc) 도 같이 출력한다. (부서 ID가 80이 아니면 null이 나오도록)
+select  e.emp_id,
+        e.emp_name,
+        e.dept_id,
+        d.dept_name,
+        d.loc
+from    emp e left join dept d on e.dept_id = d.dept_id
+and     d.dept_id = 80;  ## 타켓 테이블의 추가 조건!!
+
+# from    emp e left join dept d on e.dept_id = d.dept_id
+# where   d.dept_id = 80; 
+## 이렇게 하면 null은 빼고 나옴
+
+## 부서의 ID(dept.dept_id), 부서이름(dept.dept_name)과 그 부서에 속한 직원들의 수를 조회. 
+## 직원이 없는 부서는 0이 나오도록 조회하고 직원수가 많은 부서 순서로 조회.
+select  d.dept_id,
+        d.dept_name,
+        count(emp_id) # 직원관련 primary key컬럼 count()
+	# count(*) 이렇게 하면 직원이 없는데도 1이 무조건 나옴(소스가 dept이기때문)
+	
+from    dept d left join emp e on d.dept_id = e.dept_id
+group by d.dept_id, d.dept_name
+order by 3 desc;
+
+## 2003년~2005년 사이에 입사한 직원의 id(emp.emp_id), 이름(emp.emp_name), 업무명(job.job_title), 급여(emp.salary), 
+## 입사일 (emp.hire_date), 상사이름(emp.emp_name), 상사의입사일(emp.hire_date), 
+## 소속부서이름(dept.dept_name), 부서위치(dept.loc)를 조회.
+## 2003년에서 2005년 사이 입사한 직원은 모두 나오도록 조회한다. 
+select  e1.emp_id "직원ID",
+        e1.emp_name "직원이름",
+        j.job_title "직원업무명",
+        e1.salary "직원급여",
+        e1.hire_date "직원 입사일",
+        e2.emp_name "상사 이름",
+        e2.hire_date "상사 입사일",
+        d2.dept_name "상사 부서명",
+        d.dept_name "직원 부서명",
+        d.loc "직원의 부서 위치",
+        d2.loc "상사의 부서 위치"
+from    emp e1 left join job j on e1.job_id = j.job_id
+               left join emp e2 on e1.mgr_id = e2.emp_id
+               left join dept d on e1.dept_id = d.dept_id   ## d : 직원의 부서 table
+               left join dept d2 on e2.dept_id = d2.dept_id ## d2 : 상사의 부서 table
+where   to_char(e1.hire_date, 'yyyy') between 2003 and 2005;
+```
+## 2-2. Oracle 문법(Outer Join 구문)
+- FROM 절에 조인할 테이블을 나열
+- WHERE 절에 조인 조건을 작성
+    - 타겟 테이블에 `(+)` 를 붙인다.
+    - FULL OUTER JOIN은 지원하지 않는다.
+- OUTER는 생략 가능.
+- Oracle Outer join사용 예제
+```sql
+# 모든 직원의 id(emp.emp_id), 이름(emp.emp_name), 부서_id(emp.dept_id)를 조회하는데
+# 부서_id가 80 인 직원들은 부서명(dept.dept_name)과 부서위치(dept.loc) 도 같이 출력한다. (부서 ID가 80이 아니면 null이 나오도록)
+select  e.emp_id,
+        e.emp_name,
+        e.detp_id,
+        d.dept_ame,
+        d.loc
+from    emp e, dept d
+where   e.dept_id = d.dept_id(+) -- join 연산
+--and     d.dept_id = 80;        -- where 연산 but 타켓에 대한 join연산 하고싶..
+and     d.dept_id(+) = 80;       -- 이렇게!!
+
+## 부서의 ID(dept.dept_id), 부서이름(dept.dept_name)과 그 부서에 속한 직원들의 수를 조회. 
+## 직원이 없는 부서는 0이 나오도록 조회하고 직원수가 많은 부서 순서로 조회.
+select  d.dept_id,
+        d.dept_name,
+        count(e.emp_id)
+from    dept d, emp e
+where   d.dept_id = e.dept_id(+)
+group by d.dept_id, d.dept_name
+order by 3 desc;
+
+## 2003년~2005년 사이에 입사한 직원의 id(emp.emp_id), 이름(emp.emp_name), 업무명(job.job_title), 급여(emp.salary), 
+## 입사일 (emp.hire_date), 상사이름(emp.emp_name), 상사의입사일(emp.hire_date), 
+## 소속부서이름(dept.dept_name), 부서위치(dept.loc)를 조회.
+## 2003년에서 2005년 사이 입사한 직원은 모두 나오도록 조회한다. 
+select  e1.emp_id "직원ID",
+        e1.emp_name "직원이름",
+        j.job_title "직원업무명",
+        e1.salary "직원급여",
+        e1.hire_date "직원 입사일",
+        e2.emp_name "상사 이름",
+        e2.hire_date "상사 입사일",
+        d2.dept_name "상사 부서명",
+        d.dept_name "직원 부서명",
+        d.loc "직원의 부서 위치",
+        d2.loc "상사의 부서 위치"
+from    emp e1, job j, emp e2, dept d, dept d2
+where   e1.job_id = j.job_id(+)
+and     e1.mgr_id = e2.emp_id(+)
+and     e1.dept_id = d.dept_id(+)
+and     e2.dept_id = d2.dept_id(+)
+and     to_char(e1.hire_date, 'yyyy') between 2003 and 2005
+order by 1 asc;
+```
+- join 했을 때 `*`를 붙이면 join한 테이블 전부 조회가 된다.
+- 그래서 join한 상태에서 특정 테이블만 전체 조회 하고 싶으면 테이블명.*(`e1.*`)
+```sql
+select e1.*, j.* # e1과 j 테이블의 전체 컬럼들
+from    emp e1 left join job j on e1.job_id = j.job_id
+               left join emp e2 on e1.mgr_id = e2.emp_id
+               left join dept d on e1.dept_id = d.dept_id -- d : 직원의 부서 table
+               left join dept d2 on e2.dept_id = d2.dept_id -- d2 : 상사의 부서 table
+where   to_char(e1.hire_date, 'yyyy') between 2003 and 2005;
+```
