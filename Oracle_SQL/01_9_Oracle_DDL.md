@@ -10,7 +10,7 @@
 
 - 기본 문법
      - `constraint 제약조건이름 [제약조건타입]`
-     - 테이블 제약 조건 조회 : `USER_CONSTRAINTS 딕셔너리 뷰에서 조회`
+     - 테이블 제약 조건 조회 : `select * from USER_CONSTRAINTS 딕셔너리 뷰에서 조회`
      - 테이블 삭제
         - `drop table 테이블이름 [CASCADE CONSTRAINTS(부모테이블 삭제할 때)]`
   - `컬럼 레벨 설정` : 컬럼 설정에 같이 설정
@@ -79,7 +79,22 @@
   ```
     - ALTER TABLE 테이블이름 RENAME COLUMN 원래이름 TO 바꿀이름;
 
+### 2-2. 제약 조건 관련 수정
+-제약조건 추가
+  ```sql
+  alter table cust add constraint pk_cust primary key(cust_id); -- cust테이블에 pk를 추가
+        alter table cust add constraint uk_cust_cust_email unique(cust_email); -- uk 추가
+        alter table cust add constraint ck_cust_gender check(gender in ('M', 'F')); -- ch
+  ```
+  - ALTER TABLE 테이블명 ADD CONSTRAINT 제약조건 설정
 
+- 제약조건 삭제
+  ALTER TABLE 테이블명 DROP CONSTRAINT 제약조건이름
+  PRIMARY KEY 제거: ALTER TABLE 테이블명 DROP PRIMARY KEY [CASCADE]
+	- CASECADE : 제거하는 Primary Key를 Foreign key 가진 다른 테이블의 Foreign key 설정을 모두 삭제한다.
+
+- NOT NULL <-> NULL 변환은 컬럼 수정을 통해 한다.
+   - ALTER TABLE 테이블명 MODIFY (컬럼명 NOT NULL),  - ALTER TABLE 테이블명 MODIFY (컬럼명 NULL)
 #### 테이블 복사!
 - customers 커피해서 cust
 - select 결과 set을 테이블로 생성 (not null를 제외한 다른 제약조건은 카피가 안됨)
