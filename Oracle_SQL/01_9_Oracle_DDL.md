@@ -10,7 +10,10 @@
 
 - 기본 문법
      - `constraint 제약조건이름 [제약조건타입]`
-     - 테이블 제약 조건 조회 : `select * from USER_CONSTRAINTS 딕셔너리 뷰에서 조회`
+     - 테이블 제약 조건 조회 : USER_CONSTRAINTS 딕셔너리 뷰에서 조회
+     ```sql
+     select * from user_constraints where table_name = 'CUST';
+     ```
      - 테이블 삭제
         - `drop table 테이블이름 [CASCADE CONSTRAINTS(부모테이블 삭제할 때)]`
   - `컬럼 레벨 설정` : 컬럼 설정에 같이 설정
@@ -82,19 +85,27 @@
 ### 2-2. 제약 조건 관련 수정
 -제약조건 추가
   ```sql
-  alter table cust add constraint pk_cust primary key(cust_id); -- cust테이블에 pk를 추가
-        alter table cust add constraint uk_cust_cust_email unique(cust_email); -- uk 추가
-        alter table cust add constraint ck_cust_gender check(gender in ('M', 'F')); -- ch
+  alter table cust add constraint pk_cust primary key(cust_id); # cust테이블에 pk를 추가
+  alter table cust add constraint uk_cust_cust_email unique(cust_email); # uk 추가
+  alter table cust add constraint ck_cust_gender check(gender in ('M', 'F')); # ch 추가
   ```
   - ALTER TABLE 테이블명 ADD CONSTRAINT 제약조건 설정
-
+ 
 - 제약조건 삭제
-  ALTER TABLE 테이블명 DROP CONSTRAINT 제약조건이름
-  PRIMARY KEY 제거: ALTER TABLE 테이블명 DROP PRIMARY KEY [CASCADE]
-	- CASECADE : 제거하는 Primary Key를 Foreign key 가진 다른 테이블의 Foreign key 설정을 모두 삭제한다.
+  ```sql
+  alter table cust drop constraint ck_cust_gender;
+  alter table cust drop constraint pk_cust;
+	alter table cust drop primary key;
+  ```
+  - ALTER TABLE 테이블명 DROP CONSTRAINT 제약조건이름
+  - PRIMARY KEY 제거: ALTER TABLE 테이블명 DROP PRIMARY KEY [CASCADE]
+	      - `CASECADE` : 제거하는 Primary Key를 Foreign key 가진 다른 테이블의 Foreign key 설정을 모두 삭제한다.
 
-- NOT NULL <-> NULL 변환은 컬럼 수정을 통해 한다.
-   - ALTER TABLE 테이블명 MODIFY (컬럼명 NOT NULL),  - ALTER TABLE 테이블명 MODIFY (컬럼명 NULL)
+  - NOT NULL <-> NULL 변환은 `컬럼 수정`을 통해 한다.
+      - `ALTER TABLE 테이블명 MODIFY (컬럼명 NOT NULL)`
+      - `ALTER TABLE 테이블명 MODIFY (컬럼명 NULL)`
+      
+      
 #### 테이블 복사!
 - customers 커피해서 cust
 - select 결과 set을 테이블로 생성 (not null를 제외한 다른 제약조건은 카피가 안됨)
@@ -104,18 +115,48 @@
   select * from customers; # select한 결과로 테이블을 만든다.
   ```
 
+## 3. SEQUENCE(시퀀스)
+- 자동증가하는 숫자를 제공하는 오라클 객체
+- 테이블 컬럼이 자동증가하는 고유 번호를 가질때 사용
+    - 하나의 시퀀스를 여러 테이블이 공유하면 중간이 빈 값들이 들어갈 수 있다.
+### 3-1. 구문
+```sql
+CREATE SEQUENCE sequence이름
+	[INCREMENT BY n]	
+	[START WITH n]                		  
+	[MAXVALUE n | NOMAXVALUE(default)]   
+	[MINVALUE n | NOMINVALUE(default)]	
+	[CYCLE | NOCYCLE(기본)]		
+	[CACHE n | NOCACHE]
+```
+- `INCREMENT BY n`: 증가치(default : 1)
+- `START WITH n`: 시작 값(default : 0)
+	- 시작값 설정시
+	 - 증가: MINVALUE 보다 크커나 같은 값이어야 한다.
+	 - 감소: MAXVALUE 보다 작거나 같은 값이어야 한다.
+- `MAXVALUE n`: 생성할 수 있는 최대값
+- `NOMAXVALUE` : 시퀀스가 생성할 수 있는 최대값을 오름차순의 경우 10^27 의 값. 내림차순의 경우 -1을 자동으로 설정. 
+- `MINVALUE n` :최소 값을 지정
+- `NOMINVALUE` :시퀀스가 생성하는 최소값을 오름차순의 경우 1, 내림차순의 경우 -(10^26)으로 설정
+- `CYCLE` 또는 `NOCYCLE` : 최대/최소값까지 갔을때 순환할 지 여부. NOCYCLE이 (default : 순환반복하지 않는다.)
+- `CACHE|NOCACHE` : 캐쉬 사용여부 지정.(오라클 서버가 시퀀스가 제공할 값을 미리 조회해 메모리에 저장) NOCACHE가 기본값(CACHE를 사용하지 않는다. )
+
+### 3-2. 시퀀스 자동증가값 조회
+ - `sequence이름.nextval`  : 다음 증감치 조회
+ - `sequence이름.currval`  : 현재 시퀀스값 조회
 
 
+### 3-3. 시퀀스 수정
+```sql
+ALTER SEQUENCE 수정할 시퀀스이름
+	[INCREMENT BY n]	               		  
+	[MAXVALUE n | NOMAXVALUE]   
+	[MINVALUE n | NOMINVALUE]	
+	[CYCLE | NOCYCLE(기본)]		
+	[CACHE n | NOCACHE]	
+```
+- 수정후 생성되는 값들이 영향을 받는다. (그래서 `start with` 절은 **수정대상**이 아니다.)	  
 
 
-
-
-
-
-
-
-
-
-
-
-
+### 3-4. 시퀀스 제거
+ - `DROP SEQUENCE sequence이름`
