@@ -24,7 +24,7 @@
     - 각 축(axis) 별 데이터 개수
 4. 크기(`size`)
     - 배열내 원소의 총 개수
-- 사진###############################################################
+- ![배열](https://user-images.githubusercontent.com/77317312/108067308-ecd08200-70a3-11eb-92ea-c18f758b6f7b.PNG)
 - [출처]https://www.oreilly.com/library/view/elegant-scipy/9781491922927/ch01.html
 
 #### 넘파이 배열(ndarray)
@@ -52,7 +52,7 @@
           - `'int'`, `'int64'`, `'float'`
       - numpy에 각 타입이 변수로 제공
           - `numpy.int`, `numpy.int64`, `numpy.float`
-- 사진###############################################################
+- ![넘파이 데이터 타입](https://user-images.githubusercontent.com/77317312/108067331-f528bd00-70a3-11eb-8b4b-03f1111e6cf4.PNG)
 - 사용예제
 ```python
 import numpy as np
