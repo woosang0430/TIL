@@ -1,3 +1,25 @@
+#### 원하는 곳 건너뛰기
+> 넘파이 생성 함수
+> - zeros() # 0벡터 생성
+> - ones() # 1벡터 생성
+> - full() # 원하는 값을 채운 배열 생성
+> - zeros_like() / ones_like() # 매개변수로 받은 배열과 같은 shape의 0 or 1로 채운 배열 생성
+> - arange() # 파이썬 range()와 비슷
+> - linspace(s) # 시작과 끝을 균등하게 나눈 값을 가진 배열 생성
+> - exe() / identity() # 대각행렬, 항등행렬
+> 
+> 난수 함수
+> - np.random.seed() # 시드값 난수 발생 알고리즘이 사용할 시작값
+> - np.random.rand() # 0 ~ 1사이의 실수 
+> - np.random.normal() # 정규분포를 따르는 난수
+> - 번외 matplotlib.pyplot 맛보기 # 그래프 시각화
+> - np.random.randint() # 임의의 정수를 가지는 배열
+> - np.random.choice() # 샘플링
+> 
+> 배열의 값 섞기
+> - np.random.shuffle() # 원본 섞기
+> - np.random.permutation() # 원본을 섞은 배열 copy 반환
+
 # NUMPY
 - 강력한 다차원 배열(array) 지원 
 - 고성능 과학연산을 위한 패키지로 데이터 분석, 머신러닝등에 필수로 사용
@@ -300,6 +322,94 @@ print(plt.show())
 - ![정규분포 그래프](https://user-images.githubusercontent.com/77317312/108153809-39a56e80-711f-11eb-8fcb-8ad476dab4d4.PNG)
 
 ## 4. np.random.randint(low, high=None, size=None, dtype='l')
-
+- 임의의 정수를 가지는 배열
+    - `low ~ high` 사이의 정수 리턴. `high`는 포함안됨
+    - `high` 생략시 `0 ~ low` 사이 정수 리턴. `low`는 포함안됨
+    - `size` : 배열의 크기. 다차원은 튜플로 지정 default 1개
+    - `dtrpe` : 원소의 타입
+- [참고](https://numpy.org/doc/stable/reference/random/generated/numpy.random.randint.html?highlight=randint#numpy.random.randint)
+- 사용예제
+```python
+import numpy as np
+print(np.random.randint(1, 10)) # 1~10-1 사이의 정수를 난수로 발생
+# 7
+print(np.random.randint(-10, 10, size=(2,5)))
+"""
+[[-1 -3 -4  1 -4]
+ [-6 -3  1  6  4]]
+"""
+```
 ## 5. np.random.choice(a, size=None, replace=True, p=None)
+- 샐플링 메소드
+- `a` : 샘프링 대상. 1차원 배열 또는 정수(정수일 경우 0 ~ 정수, 마지막 지정 값 미포함)
+- `size` : 샘플 개수
+    - 배열의 형태X, 몇개를 뽑을지 정하는 것
+- `replace` : True-복원추출(default), False-비복원추출
+    - `True` : 중복 허용 (복원 추출)
+    - `False` : 중복 비허용 (비복원 추출)
+- `p` : 대상 값들 추출될 확률 지정한 배열
+    - `p` == 확률 : 백분율 0~1 사이의 수로 Ex) 0.5(50%), 0.25(25%) 등
+- [참고](https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html?highlight=choice#numpy.random.choice)
+- 사용예제
+```python
+import numpy as np
+print(np.random.choice(a=10, size=5)) # 5개 -> 1차원 배열
+# [9, 4, 3, 8, 5]
 
+print(np.random.choice(a=10, size=5, replace=False) # 비복원 추출(하나의 값 중복 X)
+# [4, 6, 8, 9, 0]
+
+a = np.random.choice([True, False], size=20)
+print(a)
+print()
+print(np.unique(a, return_counts=True)) # 어떤 값들로 구성되어있는지 반환
+"""
+결과값
+[ True,  True, False,  True, False,  True, False, False,  True,
+True,  True,  True, False, False, False, False, False, False,
+False, False]
+
+(array([False,  True]), array([12,  8], dtype=int64))
+"""
+```
+## 번외 샘플링 개념
+- 리스트에서 랜덤하게 뽑아낸 값
+- choice는 배열 안에 있는 값 중 난수로 일부만 추출하는 것 (샘플링이라 한다.)
+- 모집단 ==> 전체 데이터
+- 표본(샘플) ==> 데이터에서 일부만 빼것
+
+## 번외 2 딥러닝 머신러닝에서 많이 쓰이는 컨셉
+## 배열의 값 섞기
+- `np.random.shuffle(배열)` : 원본을 섞는다.
+- `np.random.permutation(배열)` : 원본을 섞은 copy배열을 반환
+- 다차원 배열의 경우 0번 축을 기준으로 섞는다. **축 지정 X**
+- 사용예제
+```python
+import numpy as np
+
+a = np.arange(10)
+print(a)
+# [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+b = np.permutation(a)
+print(b)
+print(a)
+# [8, 5, 1, 4, 2, 0, 7, 9, 6, 3]
+# [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+np.random.shuffle(a)
+print(a)
+# [0, 4, 6, 8, 9, 2, 3, 1, 5, 7]
+
+c = np.arange(6).reshape(3,2)
+print(c)
+#[[0, 1],
+  [2, 3],
+  [4, 5]]
+
+print(np.random.permutation(c)) # shuffle은 위와 같은 개념
+#[[0, 1],
+  [2, 3],
+  [4, 5]]
+# 다차원의 배열일 경우 배열만 왔다 갔다하는 개념
+```
