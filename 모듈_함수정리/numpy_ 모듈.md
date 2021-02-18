@@ -9,7 +9,7 @@
 > - exe() / identity() # 대각행렬, 항등행렬
 > 
 > 난수 함수
-> - np.random.seed() # 시드값 난수 발생 알고리즘이 사용할 시작값
+> - np.random.seed() # 시드값 난수 발생 알고리즘이 사용할 시작값(개발 단계에서 효율성을 따지기 위한)
 > - np.random.rand() # 0 ~ 1사이의 실수 
 > - np.random.normal() # 정규분포를 따르는 난수
 > - 번외 matplotlib.pyplot 맛보기 # 그래프 시각화
@@ -258,9 +258,11 @@ print(e1)
 - 장점 1. 결과값을 통일할 수 있다.
 - 장점 2. 주로 개발 단계에서 동일한 값으로 알고리즘의 효율성을 따지기 위해 사용된다
 
-## 2. np.random.rand(axis0[, axis1, axis2, ...])
+## 2. np.random.rand(axis0[, axis1, axis2, ...]), np.random.rand([])
 - 0 ~ 1 사이의 실수를 리턴
 - 축의 크기는 순서대로 나열
+- 균등 분포하고 한다.
+- rand와 random의 차이는 인수의 데이터 타입!! rand = 정수, random = 리스트/튜플 (결과는 같음)
 - 참고 (https://numpy.org/doc/stable/reference/random/generated/numpy.random.rand.html?highlight=rand#numpy.random.rand)
 
 - 1, 2번 사용 예제
@@ -290,11 +292,11 @@ print(np.random.rand(5)) # (5,)
 
 ## 3. np.random.normal(loc=0.0, scale=1.0, size=None)
 - 정규분포를 따르는 난수. 
-- [참고]
 - `loc` : 평균
 - `scale` : 표준편차
 - `loc`, `scale` 생략시 표준정규 분포를 따르는 난수를 제공
         - 표준정규분포 : 평균 : 0, 표준편차 : 1 인 분포
+- [참고](https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html?highlight=normal#numpy.random.normal)
 ```python
 import numpy as np
 np.random.normal()
@@ -340,7 +342,7 @@ print(np.random.randint(-10, 10, size=(2,5)))
 """
 ```
 ## 5. np.random.choice(a, size=None, replace=True, p=None)
-- 샐플링 메소드
+- 샐플링 메소드 (배열안의 값을 꺼내 확인하는 것)
 - `a` : 샘프링 대상. 1차원 배열 또는 정수(정수일 경우 0 ~ 정수, 마지막 지정 값 미포함)
 - `size` : 샘플 개수
     - 배열의 형태X, 몇개를 뽑을지 정하는 것
@@ -350,6 +352,11 @@ print(np.random.randint(-10, 10, size=(2,5)))
 - `p` : 대상 값들 추출될 확률 지정한 배열
     - `p` == 확률 : 백분율 0~1 사이의 수로 Ex) 0.5(50%), 0.25(25%) 등
 - [참고](https://numpy.org/doc/stable/reference/random/generated/numpy.random.choice.html?highlight=choice#numpy.random.choice)
+## 번외 샘플링 개념
+- 리스트에서 랜덤하게 뽑아낸 값
+- choice는 배열 안에 있는 값 중 난수로 일부만 추출하는 것 (샘플링이라 한다.)
+- 모집단 ==> 전체 데이터
+- 표본(샘플) ==> 데이터에서 일부만 빼것
 - 사용예제
 ```python
 import numpy as np
@@ -372,13 +379,8 @@ False, False]
 (array([False,  True]), array([12,  8], dtype=int64))
 """
 ```
-## 번외 샘플링 개념
-- 리스트에서 랜덤하게 뽑아낸 값
-- choice는 배열 안에 있는 값 중 난수로 일부만 추출하는 것 (샘플링이라 한다.)
-- 모집단 ==> 전체 데이터
-- 표본(샘플) ==> 데이터에서 일부만 빼것
 
-## 번외 2 딥러닝 머신러닝에서 많이 쓰이는 컨셉
+## 번외 딥러닝 머신러닝에서 많이 쓰이는 컨셉
 ## 배열의 값 섞기
 - `np.random.shuffle(배열)` : 원본을 섞는다.
 - `np.random.permutation(배열)` : 원본을 섞은 copy배열을 반환
