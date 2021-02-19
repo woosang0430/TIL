@@ -18,7 +18,7 @@
 > - `ndarray[boolean_list]` # True인 idx의 값 반환
 > - `ndarray[ndarray > 10]` # ndarray의 10초과인 값의 idx값만 반환(특정조건을 만족하는 애들만!)
 > 
-> 넘파이 비교연산자
+> 넘파이 연산자
 > - ndarray[(ndarray > 10) `&` (ndarray < 30)] # `and`
 > - ndarray[(ndarray > 10) `|` (ndarray < 30)] # `or`
 > - ndarray[`~`(ndarray > 50)] # `not`
@@ -157,20 +157,20 @@ ndarray[ndarray >= 50]  # 조건에 맞는 친구 True만 조회
 # arr의 원소 중 50이상인 값들만 조회
 ```
 
-# 3-1. 넘파이 비교연산자
+# 3-1. 넘파이 논리연산자
 - 파이썬 비교 연산자 `and`, `or`, `not`은 사용 안됨
 - `&` : and
 - `|` : or
 - `~` : not
-- 피연산자들을 ( )로 묶어야 한다.
+- 피연산자들을 `( )`로 묶어야 한다.
 ```python
 ndarray[(ndarray >= 20) & (ndarray <= 30)]
 # 20 ~ 30
 ```
 
 # 3-2. np.where() - 조건절 같은 친구
-- `np.where(boolean 배열) - True인 index를 반환
-- boolean연산과 같이 쓰면 틀정 조건을 만족하는 원소의 idx조회
+- `np.where(boolean 배열)` # True인 index를 반환
+- boolean연산과 같이 쓰면 특정 조건을 만족하는 원소의 idx조회
 - `np.where(boolean 배열, True를 대체할 값, False를 대체할 값)`
     - True와 False를 다른 값으로 변경한다.
 ```python
@@ -178,7 +178,7 @@ import numpy as np
 
 # 랜덤으로 0과 1의 수를 받고 0이면 여자 1이면 남자로 표현
 gender = np.random.choice([0,1], size = 5)
-np.where(gender, "남자", "여자") # 정수에서 은 False
+np.where(gender, "남자", "여자") # 정수에서 0은 False
 
 arr = [
     [1,10,7],
@@ -186,12 +186,12 @@ arr = [
     [10,2,8]
 ]
 arr = np.array(arr)
-r = np.where(arr2 >= 5)
+r = np.where(arr >= 5)
 print(r)
 # (array([0, 0, 1, 2, 2], dtype=int64), array([1, 2, 2, 0, 2], dtype=int64))
 # 해석 5이상인 값의 인덱스 (0,1), (0,2), (1,2), (2,0), (2,2)
 ```
-# 3-3. np.any(boolean 배열), np.all(boolean 배열)
+# 3-3. np.any(boolean 배열) / np.all(boolean 배열)
 - `np.any(boolean 배열)`
     - 배열에 True가 하나라도 있으면 True 반환
 - `np.all(boolean 배열)`
@@ -204,7 +204,7 @@ print(r)
 - `np.sort(arr)` / `ndarray.sort()` : arr을 정렬
     - `np.sort(arr)` : 정렬한 결과를 새로운 배열을 반환 (`sorted()`와 비슷)
     - `ndarray.sort()` : 원본 배열을 정렬
-- `np.argsort(arr)` : 정렬 후 index만을 반환
+- `np.argsort(arr)` : 정렬 후 원본배열에 있었던 index만을 반환
 - 오름차순정렬만 지원. 내림차순을 할 경우 정렬 후 `.reverese()` or `slicing[::-1]`
 - 정렬의 기준 축(axis)으로 설정 가능
 ```python
