@@ -209,9 +209,49 @@ print(np.insert(b, 2, [10,20,30], axis=1)
 - `axis` : 축 지정
     - `None`(default) : flatten 한 뒤 삭제한다.
 ```python
+# 1차원
+a = np.arange(10)
+print(a)
+# [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
+a1 = np.delete(a, 0)
+print(a1)
+# [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+a2 = np.delete(a, [2,5,6])
+print(a2)
+# [0, 1, 3, 4, 7, 8, 9]
+
+# slicing을 이용해서 삭제 가능
+# slicing을 함수의 매개변수로 전달할 경우 np._s[slicing]
+print(np.delete(a, a[::2]))
+print(np.delete(a, np.s_[::2]))
+# [1 3 5 7 9]
+# [1 3 5 7 9]
+
+# 다차원
+b = np.arange(9).reshape(3,3)
+print(b)
+# [[0, 1, 2],
+#  [3, 4, 5],
+#  [6, 7, 8]]
+b1 = np.delete(b, [0,1], axis=0)
+print(b1)
+# [[6, 7, 8]]
+b2 = np.delete(b, [0,1], axis=1)
+print(b2)
+# [[2],
+#  [5],
+#  [8]]
+print(np.delete(b, 0)) # axis생략 : flatten()후에 delete()
+# [1, 2, 3, 4, 5, 6, 7, 8]
 ```
 ## 5. 배열 합치기
+> a : (3,2), b : (3,5) : axis=1 (3, 7)
+> a : (4,2), b : (4,2) : axis=0 (8,2), axis=1 (4,4)
+> a : (2,3,5), b : (3,1,5) : xxx # 3차원인 경우 rank의 값이 한개만 달라야한다.
+> a : (2,3,5), b : (7,3,5) : axis=0 (9,3,7)
+
 ### 5-1. np.concatenate(합칠 배열리스트, axis=0)
 - 여러 배열을 **축의 개수(rank)**를 유지하며 합친다.
 - `axis` : 축지정
@@ -224,14 +264,35 @@ print(np.insert(b, 2, [10,20,30], axis=1)
     - 1차원 끼리 합치면 1차원 결과가 나옴
 - 2차원끼리, 3차원끼리, n차원끼리
 ```python
+import numpy as np
 
+x = np.arange(6).reshape(2,3)
+y = np.arange(10, 16).reshape(2,3)
+z = np.arange(20, 26).reshape(2,3)
+print(x.shape, y.shape, z.shape)
+# (2, 3) (2, 3) (2, 3)
+
+r = np.concatenate([x,y], axis=0)
+print(r.shape)
+# (4, 3)
 ```
 ### 5-2. vstack(합칠배열리스트) # 2차원 배열 전용!
 - 수직으로 쌓는다.
 - `concatenate()`의 axis=0와 동일
 - 합칠 배열들의 열수가 같아야 한다.
 ```python
+import numpy as np
 
+x = np.arange(6).reshape(2,3)
+y = np.arange(10, 16).reshape(2,3)
+z = np.arange(20, 26).reshape(2,3)
+
+# np.vstack([x,w]) # 1번축의 개수가 같아야 한다.
+print(x.shape, y.shape, z.shape)
+# (2, 3) (2, 3) (2, 3)
+
+print(np.vstack([x,y,z]).shape)
+# (6, 3)
 ```
 
 ### 5-3. hstack(합칠배열리스트) # 2차원 배열 전용!
@@ -239,7 +300,15 @@ print(np.insert(b, 2, [10,20,30], axis=1)
 - `concatenate()`의 axis=1와 동일
 - 합칠 배열들의 행 수가 같아야 한다.
 ```python
+import numpy as np
 
+x = np.arange(6).reshape(2,3)
+y = np.arange(10, 16).reshape(2,3)
+z = np.arange(20, 26).reshape(2,3)
+
+# np.hstack([x,r]) # 0번축의 개수가 같아야한다.
+print(np.hstack([x,y,z]).shape)
+# (2, 9)
 ```
 ## 6. 배열 나누기
 ### 6-1. split(배열, 분할기준, axis)
