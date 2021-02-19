@@ -67,11 +67,20 @@ import numpy as np
 
 a = np.arange(1, 6)
 print(a.shape)
+print(a)
 # (5,)
+# [1, 2, 3, 4, 5]
 
 a1 = np.expand_dims(a, axis=1)
 print(a1.shape)
+print(a1)
 # (5, 1)
+
+# [[1],
+#  [2],
+#  [3],
+#  [4],
+#  [5]]
 ```
 ## 3. 차원 줄이기(축소)
 ### 3-1. numpy.squeeze(배열, axis=None), 배열객체.squeeze(axis=None)
