@@ -1,3 +1,40 @@
+## 한눈에 보기
+> 배열 형태 변경
+> - np.reshape(a, newshape) # 원하는 대로 지정해서 바꿔줄께
+> - ndarray.reshape(newshape) 
+> 
+> 차원 늘리기
+> - np.newaxis # 속성(변수)을 이용한 차원 늘리기
+> 
+> - numpy.expand_dims (배열, axis) # 매개변수로 받은 배열에 지정한 axis의 rank 확장
+> 
+> 차원 줄이기
+> - np.squeeze(배열, axis=None) # 차원 줄이기
+> - 배열객체.squeeze(axis=None)
+> 
+> - ndarray.flatten() # 1차원 배열로 바꿔는 친구
+> 
+> append / insert / delete
+> - np.append(배열, 추가할값, axis=None) # 마지막 idx에 추가
+> 
+> - np.insert(배열, idx, 추가할값, axis=None) # 원하는 idx에 삽입
+> 
+> - np.delete(배열, 삭제할idx, axis=None) # 원하는 idx의 값 삭제
+> 
+> 배열 합치기
+> - np.concatenate(합칠 배열리스트, axis=0)
+> 
+> - np.vstack(합칠배열리스트)
+> 
+> - np.hstack(합칠배열리스트)
+> 
+> 배열 분할 하기
+> - np.split(배열, 분할기준, axis)
+> 
+> - np.vsplit(배열, 분할기준)
+> 
+> - np.hsplit(배열, 분할기준)
+
 # 배열의 형태(shape) 변경
 
 ## 1. reshape()를 이용한 차원 변경 (만능 치트키)
