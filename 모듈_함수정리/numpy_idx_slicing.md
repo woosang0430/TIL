@@ -15,8 +15,8 @@
 > - `ndarray.copy()` # 배열을 복사한 새로운 배열 생성
 > 
 > boolean indexing(많이쓰임)
-> - `ndarray[boolean_list]` # True인 idx만 반환
-> - `ndarray[ndarray > 10]` # ndarray의 10초과인 값의 idx값만 반환
+> - `ndarray[boolean_list]` # True인 idx의 값 반환
+> - `ndarray[ndarray > 10]` # ndarray의 10초과인 값의 idx값만 반환(특정조건을 만족하는 애들만!)
 > 
 > 넘파이 비교연산자
 > - ndarray[(ndarray > 10) `&` (ndarray < 30)] # `and`
