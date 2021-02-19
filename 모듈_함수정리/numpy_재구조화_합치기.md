@@ -8,9 +8,23 @@
     - 원본 배열을 변경시키지 않는다.(shape을 바꾼 새로운 배열을 반환)
     - 변경하는 배열의 사이즈가 같아야한다.
 ```python
+import numpy as np
 
+a = np.arange(10)
+# [0 1 2 3 4 5 6 7 8 9]
+
+b = np.reshape(a, (2,5))
+# [[0 1 2 3 4]
+#  [5 6 7 8 9]]
+
+
+f = np.arange(5*5*5).reshape(5,5,5)
+g = np.arange(3*2*7).reshape(3,2,7)
+print(f.shape)
+print(g.shape)
+#(5, 5, 5)
+#(3, 2, 7)
 ```
-
 ## 2. 차원 늘리기(확장)
 ### 2-1. `numpy.newaxis` 속성을 이용한 차원 늘리기(변수)
 - `np.newaxis` == 1 이라고 생각하자
@@ -20,18 +34,44 @@
     - slicing의 경우 원하는 위치의 축을 늘릴 수 있다.
     - index에 `...`과 사용하는 경우 첫 번쨰나 마지막 축을 늘릴때 사용
 ```python
+import numpy as np
 
+a = np.arange(1, 6)
+print(a.shape)
+# (5,)
+
+a1 = a[np.newaxis, :]
+print(a1.shape)
+# (1, 5)
+
+a2 = a[np.newaxis, :, np.newaxis]
+print(a2.shape)
+# (1, 5, 1)
 ```
 ### 2-2. indexing에 ...과 같이 사용
 - `ndarray[..., np.newaxis]`
 - 첫번째 축이나 마지막 축을 늘릴 때만 사용가능
 ```python
+b = np.arange(6).reshape(2, 3)
+print(b.shape)
+# (2, 3)
 
+b2 = b[..., np.newaxis]
+print(b2.shape)
+# (2, 3, 1)
 ```
 ### 2-3. numpy.expand_dims(배열, axis)
 - 매개변수로 받은 배열에 지정한 axis의 rank를 확장한다.
 ```python
+import numpy as np
 
+a = np.arange(1, 6)
+print(a.shape)
+# (5,)
+
+a1 = np.expand_dims(a, axis=1)
+print(a1.shape)
+# (5, 1)
 ```
 ## 3. 차원 줄이기(축소)
 ### 3-1. numpy.squeeze(배열, axis=None), 배열객체.squeeze(axis=None)
@@ -40,33 +80,129 @@
 - 축을 지정하지 않으면 size가 1인 모든 축을 제거한다.
     - (3,1,2,1) -> (3,2)
 ```python
+import numpy as np
 
+a = np.arange(12).reshape(1,2,1,2,3,1)
+print(a.shape)
+# (1, 2, 1, 2, 3, 1)
+
+b = np.squeeze(a)
+print(b.shape)
+# (2, 2, 3)
+
+c = np.squeeze(a, axis=2) # size가 1이 아닌 축은 제거가 안됨.
+print(c.shape)
+# (1, 2, 2, 3, 1)
 ```
 ### 3-2. 배열객체.flatten()
 - 다차원 배열을 1차원으로 만든다.
 ```python
+import numpy as np
 
+#(2,3) -> (6,) / (2,2,2,3) -> (24, )
+a = np.arange(20).reshape(2,2,5)
+print(a.shape)
+# (2, 2, 5)
+
+a2 = a.flatten()
+print(a2.shape)
+# (20,)
 ```
 ## 4. .append() / .insert() / .delete()
 -  축(axis)  지정하는것을 유의해야 한다.
 -  원본은 바뀌지 않고 새로운 배열로 반환
-```python
-
-```
 ### 4-1. numpy.append(배열, 추가할 값, axis=None)
 - `배열`의 마지막 index에 `추가할 값`을 추가
 - `axis` : 축 지정
     - `None`(default) : flatten 한 뒤 추가한다.
 ```python
+import numpy as np
 
+# 1차원 배열 append
+a = np.array([1,2,3])
+
+a1 = np.append(a, 100) # 1개의 값 추가
+print(a1) 
+# [  1,   2,   3, 100]
+
+a2 = np.append(a, [200,300,400]) # 한번에 여러개의 값 추가
+print(a2)
+# [  1,   2,   3, 200, 300, 400]
+
+# 다차원 배열 append
+l = [
+    [1,1],
+    [2,2],
+    [3,3]
+]
+
+b = np.array(l)
+print(b)
+# [[1 1]
+#  [2 2]
+#  [3 3]]
+
+b1 = np.append(b, [[4,4]], axis=0)
+print(b1)
+# [[1 1]
+#  [2 2]
+#  [3 3]
+#  [4 4]]
+
+b2 = np.append(b, , [[4],[4],[4]]axis=1)
+print(b2)
+# [[1 1 4]
+#  [2 2 4]
+#  [3 3 4]]
+
+print(np.append(b, [10,20])) # 다차원배열에서 axis 생략 : flatten() 이후 append()
+# [ 1,  1,  2,  2,  3,  3, 10, 20]
 ```
 ### 4-2. numpy.insert(배열, index, 추가할 값, axis=None)
 - `배열`의 `index`에 `추가할 값`을 추가
 - `axis` : 축 지정
     - `None`(default) : flatten 한 뒤 삽입한다.
 ```python
+import numpy as np
 
+# 1차원
+a = np.array([1,2,3])
+
+a1 = np.insert(a, 2, 20) # idx 2에 20 삽입
+print(a1)
+# [  1,   2, 200,   3]
+
+# 다차원
+b = np.array([[1,1],[2,2],[3,3]])
+
+b1 = np.insert(b, 0, [4,4], axis=0)
+print(b1)
+# [[4 4]
+#  [1 1]
+#  [2 2]
+#  [3 3]]
+
+b2 = np.insert(b, 0, [4,4,4], axis=1))
+# [[4 1 1]
+#  [4 2 2]
+#  [4 3 3]]
+
+print(np.insert(b, 1, 10) # axit 생략, flatten() 이후 insert()
+# [  1, 100,   1,   2,   3]
 ```
+### 번외 append()와 insert() 조금의 차이가 있다.
+```python
+print(np.append(b, [[10],[20],[30]], axis=1)
+# [[ 1,  1, 10],
+#  [ 2,  2, 20],
+#  [ 3,  3, 30]]
+print(np.insert(b, 2, [10,20,30], axis=1)
+##print(np.insert(b, 2, [[10],[20],[30]], axis=1) 이것도 
+# [[ 1,  1, 10],
+#  [ 2,  2, 20],
+#  [ 3,  3, 30]]
+```
+
 ### 4-3. numpy.delete(배열, 삭제할index, axis=None)
 - `배열`의 `삭제할 index`의 값들을 삭제한다.
 - `삭제할 index`는 index or slice
