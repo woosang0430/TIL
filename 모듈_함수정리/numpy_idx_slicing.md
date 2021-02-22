@@ -7,13 +7,15 @@
 >     - `ndarray[[1,2,3,4,5]]`
 >     - `ndarray[[0,3],[1,4]]`
 > 
-> slicing
+> slicing    
 > - `ndarray[start : stop : step]`
-> - 다차원 배열 슬라이싱
+> 
+> 다차원 배열 슬라이싱   
 > - `ndarray[0축 slicing, 1축 slicing, .., n축 slicing]`
 > 
 > - `ndarray.copy()` # 배열을 복사한 새로운 배열 생성
-> 
+> - `np.flip(배열, axis=0)` # 배열 뒤집기
+>
 > boolean indexing(많이쓰임)
 > - `ndarray[boolean_list]` # True인 idx의 값 반환
 > - `ndarray[ndarray > 10]` # ndarray의 10초과인 값의 idx값만 반환(특정조건을 만족하는 애들만!)
@@ -119,7 +121,7 @@ print(a[1:5, 1:4])
  [21, 22, 23]]
 """
 print(a[::-1, ::-1])
-print(np.filp(a, axis=0))
+print(np.flip(a, axis=0))
 """
 [[29, 28, 27, 26, 25],
  [24, 23, 22, 21, 20],
