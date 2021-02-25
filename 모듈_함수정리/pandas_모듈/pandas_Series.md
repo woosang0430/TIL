@@ -151,35 +151,198 @@ s2.describe() # 빈도수 관련된 것 조회
 # freq      3
 # dtype: object
 ```
+### 번외. 통계량
+- 데이터셋의 데이터들의 특징을 하나의 숫자로 요약한 것
+#### 번외-1. 평균
+- 전체 데이터들의 합계를 총 개수로 나눈 통계량
+- **이상치의 영향**을 많이 받지만 같이 고르게 분포되어 있으면 데이터셋의 `대표값`으로 사용한다.
+#### 번외-2. 중앙값
+- 분포된 값들을 작은 값 부터 순서대로 나열한 뒤 그 중앙에 위치한 값
+- **이상치의 영향**을 받지 않아 평균 대신 데이터 셋의 `대표값`으로 사용된다.
+#### 번외-3. 표준편차/분산
+- 값들이 `흩어져있는 상태(분포)를 추정`하는 통계량(**분포된 값**이 **평균으로 부터 얼마나 떨어**져 있는지를 나타냄)
+- 각 데이터가 평균으로 부터 얼마나 차이가 있는지를 **편차**하고 한다. `(평균 - 데이터)`
+- `분산` : 편차 제곱의 합을 총 개수로 나눈 값
+- `표준편차`
+    - 분산의 제곱근
+    - 분산은 **원래 값에 제곱**을 했으므로 다시 원래 단위로 계산한 값
+#### 번외-4. 최빈값(mode)
+- 데이터 셋에서 가장 많이 있는 값
+#### 번외-5. 분위수(quantile)
+- 데이터의 크기 순서에 따른 위치값
+    - 데이터셋을 크기순으로 정렬 후 N등분했을 때 특정 위치에서의 값
+    - N등분한 특정위치의 값들 통해 전체 데이터셋의 분포를 파악
+    - 대표적인 분위수 : `4분위`, `10분위`, `100분위`
+- 데이터의 분포를 파악할 때 사용
+- 이상치 중 극단값들을 찾을 때 사용(**4분위수**)
+- 사진3
+> ```python
+> IQR = InterQuartile Range
+> if 극단적으로 작은 값 < Q1 - IQR * 1.5:
+>    return 극단적으로 작은값이다.
+>    
+> elif 극단적으로 큰 값 > Q3 + IQR * 1.5:
+>    return 극단적으로 큰값이다.
+> ```   
+> - [상자수염그래프] https://ko.wikipedia.org/wiki/%EC%83%81%EC%9E%90_%EC%88%98%EC%97%BC_%EA%B7%B8%EB%A6%BC
+```python
+import pandas as pd
+import numpy as np
 
+# 분위수
+arr = pd.Series(np.arange(1, 11))
 
+# 10분위 중 1분위
+print(arr.quantile(q=0.1))
+# 1.9
 
+# 중앙값
+print(arr.quantile(q=0.5))
+# 5.5
 
-### 6. 통계량
-#### 6-1. 평균
+# 4분위
+print(arr.quantile(q=[.25, .5, .75])
+# 0.25    3.25
+# 0.50    5.50
+# 0.75    7.75
+# dtype: float64
 
-#### 6-2. 중앙값
+Q1, Q2, Q3 = arr.quantile(q=[.25, .5, .75])
+print(Q1, Q2, Q3)
+# 3.25 5.5 7.75
 
-#### 6-3. 표준편차/분산
+# 극단치 생성 arr의 첫번째 원소값 1000으로 변경
+arr[0] = 1000
+print(arr.quantile(q=[.25, .5, .75]))
+# 0.25    4.25
+# 0.50    6.50
+# 0.75    8.75
+# dtype: float64
 
-#### 6-4. 최빈값
+IQR = Q3 - Q1
+param = 1.5 # 사용자 임의 기준값
+s_range = Q1 - IQR * param
+e_range = Q3 + IQR * param
 
-#### 6-5. 분위수
+print('IQR : ', IQR)
+print('극단치(작은쪽) 범위 : ', s_range)
+print('극단치(큰쪽) 범위 : ', e_range)
+# IQR :  4.5
+# 극단치(작은쪽) 범위 :  -3.5
+# 극단치(큰쪽) 범위 :  14.5
+-3.5 < arr < 14.5 -> 정상값, 이 범위를 넘어가면 극단치
+```
+### 6. 결측치
+- 판다스에서 결측치
+    - `None`, `numpy.nan`, `numpy.NAN`
+- 결측치 확인
+    - Numpy 
+        - `np.isnan(배열)`
+    - Series
+        - `Series객체.isnull()`
+        - `Series.notnull()`
+    - DataFrame
+        - `DataFrame객체.isnull()`, `DataFrame객체.isna()`
+        - `DataFrame객체.notnull()`, `DataFraeme객체.notna()`
+```python
+s = pd.Series([10, 20, np.nan, 30, np.nan, 40])
+s.isnull() # 원소별 체크
+# 0    False
+# 1    False
+# 2     True
+# 3    False
+# 4     True
+# 5    False
+# dtype: bool
+```
+#### 6-1. 결측치 처리
+- 제거
+    - `dropna()`
+- 다른값으로 대체(주로 평균 or 중앙값 or 최빈값으로 대체)
+    - `fillna()`
+    - N/A가 의미하는 것이 있을 수도 있으므로
+```python
+import numpy as np
+import pandas as pd
 
-### 7. 결측치
+s = pd.Series([10, 20, np.nan, 30, np.nan, 40])
 
-#### 7-1. 결측치 거리
+s.dropna(inplace=True) # inplace=True : 원본을 변환
+print(s)
+# 0    10.0
+# 1    20.0
+# 3    30.0
+# 5    40.0
+# dtype: float64
 
+# 평균으로 대체 
+s.fillna(s.mean())
+# 중앙값으로 대체
+s.fillna(s.median())
+# 최빈값으로 대체 보통 범주형(문자열)을 처리할 때 주로 사용
+# s.fillna(s.mode()[0])
 
-### 8. 벡터화(연산)
+# 판다스의 기술통계함수는 NA값을 무시하고 계산하는 것이 default.
+s.sum(), s.mean(), s.max(), s.min(), s.median()
+# (100.0, 25.0, 40.0, 10.0, 25.0)
 
+s.sum(skipna=False), s.mean(skipna=False)
+# (nan, nan)
+```
+### 7. 벡터화(연산)
+- Numpy 배열과 마찬가지로 Series 객체간의 연산을 하면 Series 내의 원소 별 연산을 한다.
+```python
+import numpy as np
+import pandas as pd
 
+np.random.seed(1)
+x = pd.Series([10,20,30,40,50])
+y = pd.Series(np.random.randint(2,4,5))
+print(x)
+print(y)
+# 0    10
+# 1    20
+# 2    30
+# 3    40
+# 4    50
+# dtype: int64
+# 0    3
+# 1    3
+# 2    2
+# 3    2
+# 4    3
+# dtype: int32
 
+# series간 연산 
+print(x + y)
+ 0    13
+ 1    23
+ 2    32
+ 3    42
+ 4    53
+ dtype: int64
+ 
+print(x > y)
+ 0    True
+ 1    True
+ 2    True
+ 3    True
+ 4    True
+ dtype: bool
+print(x / y)
+# 0     3.333333
+# 1     6.666667
+# 2    15.000000
+# 3    20.000000
+# 4    16.666667
+# dtype: float64
 
-
-
-
-
-
-
-
+# 반올림
+print(np.round(x/y, 2))
+# 0     3.33
+# 1     6.67
+# 2    15.00
+# 3    20.00
+# 4    16.67
+# dtype: float64
+```
