@@ -116,13 +116,13 @@ print(s9['k':'d'])
 - `sort_index()` : index 정렬, ascending=False : 내림차순
     - **DataFrame**에서 axis=0는 index, axis=1은 columns 기준으로 정렬
 - `isin([값리스트])` : `in` 연산자와 비슷
-- 사진1 #####################################
+- ![1](https://user-images.githubusercontent.com/77317312/109375939-2d31ca80-7904-11eb-8863-95846d81a51f.PNG)
 ### 5. 통계함수
 - `count()` : 결츨치를 제외한 원소 개수
 - `describe()` : 요약 통계량 제공
     - **수치형** : 기술 통계값
     - **범주형(문자열)** : 고유값 개수등 빈도수관련 정보
-- 사진2 #########################################################
+- ![2](https://user-images.githubusercontent.com/77317312/109375942-33c04200-7904-11eb-8f87-3967d162c1a8.PNG)
 ```python
 import numpy as np
 import pandas as pd
@@ -175,7 +175,7 @@ s2.describe() # 빈도수 관련된 것 조회
     - 대표적인 분위수 : `4분위`, `10분위`, `100분위`
 - 데이터의 분포를 파악할 때 사용
 - 이상치 중 극단값들을 찾을 때 사용(**4분위수**)
-- 사진3
+- ![3](https://user-images.githubusercontent.com/77317312/109375946-3d49aa00-7904-11eb-8f86-0c46dde029df.PNG)
 > ```python
 > IQR = InterQuartile Range
 > if 극단적으로 작은 값 < Q1 - IQR * 1.5:
