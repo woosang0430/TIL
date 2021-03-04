@@ -97,14 +97,13 @@ df = pd.DataFrame(data)
 cnt2_mean = df.groupby('fruits')['cnt2'].transform('mean')
 df['cnt2'] = np.round(df['cnt2'].fillna(cnt2_mean), 2)
 ```
-# 2. 일괄처리 메소드
 
-## 2-1. pivot_table()
+## 1-3. pivot_table()
 - 분류별 집계(group으로 묶어 집계)를 처리하는 함수
 - 역할은 groupby()를 이용한 집계와 같다. 약간 업그레이드 버전
 > - pivot() 함수와 역할이 다르다.
 > - pivot() 은 index와 column의 형태를 바꾸는 reshape 함수
-- `DataFrame.pivot_table(values=None, index=None, columns=None[, aggfunc='mean', fill_value=None, margins=False, dropna=True, margins_name='ALL'])
+- `DataFrame.pivot_table(values=None, index=None, columns=None[, aggfunc='mean', fill_value=None, margins=False, dropna=True, margins_name='ALL'])`
 - 매개변수
   - `index`
     - 문자열 또는 리스트, index로 올 컬럼들 => groupby였으면 묶었을 컬럼
@@ -175,14 +174,15 @@ flights.pivot(values='CANCELLED', index=['AIRLINE', 'MONTH'], columns='ORG_AIR',
 ```python
 flights.pivot(values='ARR_DELAY', index=['AIRLINE', 'MONTH'], columns='ORG_AIR', aggfunc=['min', 'max'])
 ```
+# 2. 일괄처리 메소드
 
-## 2-2. apply() - Series, DataFrame의 데이터 일괄 처리#############많이 사용함!!!
+## 2-1. apply() - Series, DataFrame의 데이터 일괄 처리***많이 사용함!!!***
 - 데이터프레임의 행들과 열들 또는 Series의 원소들에 공통된 처리를 할 때 apply 함수를 이용하면 반복문을 사용하지 않고 일광 처리 가능
 - `DataFrame.apply(함수, axis=0, args=())
   - 인수로 행이나 열을 받는 함수룰 apply 메서드의 인수로 넣으면 데이터프레임의 행이나 열들을 하나씩 함수에 전달
   - 매개변수
     - `함수` : DataFrame의 행들 또는 열들을 전달할 함수
-    - `axis` : 0행을 전달, 1열을 전달(default=0) G : 0이 행이다.
+    - `axis` : 0열을 전달, 1행을 전달(default=0) G : 0이 행이다.
     - `args` : 행/열 이외에 전달할 매개변수를 위치기반(순서대로) 튜플로 전달
 - `Series.apply(함수, args=())
   - 인수로 Series의 원소들을 전달할 함수
@@ -193,7 +193,7 @@ flights.pivot(values='ARR_DELAY', index=['AIRLINE', 'MONTH'], columns='ORG_AIR',
 df.apply(lambda x : x.mean())
 df['NO4'] = df['NO4'].apply(lambda x : f'{x}원')
 ```
-## 2-3. cut()/qcut() - 연속형(실수)을 범주형으로 변환
+## 2-2. cut()/qcut() - 연속형(실수)을 범주형으로 변환
 - `cut()` : 지정 값 기준으로 구간을 나눠 그룹으로 묶음
   - `pd.cut(x, bins, right=True, labels=None)`
   - 매개변수
@@ -226,15 +226,3 @@ print(age_cate.value_counts().sort_index())
 
 pd.qcut(ages, 3, labels=['범주1', '범주2', '범주3'])
 ```
-
-
-
-
-
-
-
-
-
-
-
-
