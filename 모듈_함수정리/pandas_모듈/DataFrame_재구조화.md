@@ -100,12 +100,40 @@ s.unstack() # 가장 안쪽 level의 index가 컬럼으로 변환
   > - melt한 경우 **index명은 무시** -> Rangeindex로 대체
   >     - index를 유지하려면 **reset_index**를 이용해 value로 뺀 뒤 ㄱㄱ
   > - stack은 열 이름을 index명으로 정돈(변경) 한다.
+```python
+import numpy as np
+import pandas as pd
+
+state_fruit.melt(id_vars=['state'], 
+                 value_vars=['Apple', 'Orange', 'Banana'], 
+                 var_name='Fruit', 
+                 value_name='Count')
+                 
+# id_vars나 value_vars에 포함되지 않은 컬럼들은 제거된다.
+state_fruit.melt(value_vars=['Apple', 'Orange']) 
+
+ # value_vars를 생략하면 id_vars의 컬럼을 제외한 모든 컬럼들을 컬럼의 값으로 만든다.
+state_fruit.melt(id_vars=['state'], 
+                 var_name='Fruit', 
+                 value_name='Count')
+
+# id_vars, value_vars를 모두 생략하면 모든 컬럼들을 컬럼의 값으로 만든다.
+state_fruit.melt() 
+```
 
 # 4. pivot - index, column, value가 될 컬럼들을 지정해 재구조화
 - DataFrame 재구조화가 목적인데 melt된 것을 원상 복구 시킬 때도 사용할 수 있다.
-- 매개변수
+- 매개변수(`df.pivot(index=None, columns=None, values-None)`)
   - **각 매개변수의 값은 단일 문자열로 컬럼명을 준다.**
   - `index` : 문자열(리스트안됨). 행이름으로 사용할 컬럼 -> 열이 index로 이동하는 형태
   - `columns` : 문자열(리스트안됨). 컬럼명으로 사용할 컬럼
     - index와 columns는 여러개 지정 X.
   - `values` : value에 올 컬럼명
+```python
+state_fruit_melt = state_fruit.melt(id_vars=['State'], 
+                                 value_vars=['Apple', 'Orange', 'Banana'], 
+                                 var_name='Fruit', 
+                                 value_name='Count')
+
+state_fruit_melt.pivot(index='State', columns='Fruit', values='Count')
+```
