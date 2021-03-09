@@ -105,6 +105,8 @@ plt.show()
 
 ## 3-1. pyplot 모듈 이용해 그리기
 - pyplot 모듈이 그래프 그리는 함수와 axes(subplot) 설정 관련 함수를 제공
+### .번외 그래프 배치해주는 메소드( plt.tight_layout())
+- plt.show() 위에 한번만 해준다.
 ```python
 import matplotlib.pyplot as plt
 
@@ -124,8 +126,152 @@ plt.subplot(1, 2, 2)
 plt.plot([1,2,3], [10,20,30])
 plt.title('두번째')
 
+plt.tight_layout()
 plt.show()
 ```
 -![11](https://user-images.githubusercontent.com/77317312/110311856-b4d7b180-8047-11eb-84d2-133b629484c7.PNG)
+- 하나의 subplt(axes)에 여러개의 그래프 그리기
+```python
+import matplotlib.pyplot as plt
+plt.figure(figsize=(7,7))
 
+# 그래프 그리기
+plt.plot([1,2,3,4,5,6], [10,20,30,40,50,60], label='Line A') # 선그래프
+plt.scatter([10,20,30,40,50,60], [1,2,3,4,5,6], label='Scatter') # 산점도
+plt.plot([10,20,30,40,50,60], [10,20,30,40,50,60], label='Line B') # 선그래프
+
+plt.legend() # 범례(lengend) 생성
+plt.show()
+```
 ## 3-2. figure와 axes(subplot) 객체를 이용해 그리기
+- figure에 axes를 추가한 뒤 axes에 그래프 그리기
+- axes 생성
+ - `figure.add_subplot()` 메소드 이용
+   - figure를 먼저 생성 후 axes 추가 생성
+ - `pyplot.subplots()` 함수 이용
+   - figure와 axes배열 동시 생성
+
+### 3-2-1. figure.add_subplot() 메소드 이용
+- figure객체에 axes를 추가하는 형태
+- nrows(총행수), ncols(총열수), index(axes위치) 지정
+```python
+import matplotlib.pyplot as plt
+# figure 객체 생성
+fig = plt.figure(figsize=(5,5))
+
+# figure에 axes(subplot) 추가
+ax1 = fig.add_subplot(2,2,1)
+ax2 = fig.add_subplot(1,2,2)
+ax3 = fig.add_subplot(2,2,3)
+
+ax1.text(.5, .5, 'ax1', fontsize=20)
+ax1.set_title('ax1')
+ax1.set_xlabel('X축')
+ax1.set_ylabel('Y축')
+
+ax2.text(.5, .5, 'ax2')
+ax2.set_title('ax2')
+ax2.set_xlabel('X축')
+ax2.set_ylabel('Y축')
+
+ax3.text(.5, .5, 'ax3')
+ax3.set_title('ax3')
+ax3.set_xlabel('X축')
+ax3.set_ylabel('Y축')
+
+plt.tight_layout()
+plt.show()
+```
+### 3-3-3. pyplot.subplots()
+- nrows, ncols로 axes개수와 위치 지정
+- 반환 : figure와 axes(subplot)들을 담은 **ndarray**
+```python
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots(2,2, figsize(10,10)) # 행수, 열수 지정
+fig.suptitle('Figure 제목', size=40) # 전체 타이틀
+
+ax1, ax2, ax3, ax4 = axes.flatten()
+
+ax1.scatter([1,2,1,2,6],[7,3,4,2,1])
+ax1.set_title('[0,0]')
+
+ax2.plot([1,2,3], [1,2,3], label='line1')
+ax2.plot([3,2,1], [1,2,3], label='line2')
+ax2.grid(True)
+ax2.legend()
+
+# axes[0,0].scatter([1,2,1,2,6],[7,3,4,2,1])
+# axes[0,0].set_title('[0,0]')
+
+for i , ax in enumerate([ax1, ax2, ax3, ax4], start=1):
+    x, y = 0.5, 0.5
+    if ax == ax1:
+        x, y = 5, 5
+    ax.text(x, y, f'ax{i}', fontsize=20)
+
+plt.tight_layout()
+plt.show()
+```
+# 4. 색상과 스타일
+## 4-1. 색 지정
+- color 또는 c 속성을 이용해 지정
+1. 색상이름으로 지정
+  - 색이름 또는 약자로 지정 가능    
+
+| 문자열 | 약자 |
+|-|-|
+| `blue` | `b` |
+| `green` | `g` |
+| `red` | `r` |
+| `cyan` | `c` |
+| `magenta` | `m` |
+| `yellow` | `y` |
+| `black` | `k` |
+| `white` | `w` |
+2. HTML 컬러 문자열
+- #RRGGBBAA
+- red/green/blue/alpha(투명도)
+3. 0~1 사이 실수로 흰색과 검은색 사이의 회색조 표시
+- https://matplotlib.org/examples/color/named_colors.html
+- https://htmlcolorcodes.com/
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(5,5), facecolor='gray')
+plt.plot([1,2,3], [10,20,30], color='r') # 색의 약어
+plt.plot([1,2,3], [10,20,30], color='goldenrod') # 색이름
+plt.plot([1,2,3], [10,20,30], color='#CF6AC8') # HTML color 코드
+plt.plot([1,2,3], [10,20,30], color='#FF0000A0') # RRGGBBAA : AA - 투명도(0에 가까울 수록 투명한 것)
+plt.plot([1,2,3], [10,20,30], color='0.9') # 0(검정) ~ 1(흰색) 실수 - 회색조
+
+plt.show()
+```
+## 4-2. style
+- Style: 그래프의 여러 시각효과들을 미리 설정해 놓은 것
+- matplotlib는 다양한 스타일들을 미리 정의해 놓고 있다.
+    - [스타일목록](https://matplotlib.org/gallery/style_sheets/style_sheets_reference.html)
+    - `plt.style.use()` 함수 이용해 지정
+    - 스타일 초기화
+```python
+import matplotlib as mpl
+mpl.rcParams.update(mpl.rcParamsDefault)
+```
+- 사용 예시
+```python
+import numpy as np
+
+x = np.linspace(1, 10, num=100)
+
+# plt.style.use('dark_background')
+# plt.style.use('ggplot')
+plt.style.use('seaborn') # 나는 이거
+
+plt.figure(figsize=(5,5))
+plt.plot(x, x+3)
+plt.plot(x, x+2)
+plt.plot(x, x+1)
+plt.plot(x, x)
+
+plt.show()
+```
