@@ -1,0 +1,101 @@
+![image](https://user-images.githubusercontent.com/77317312/113845669-b88a5f80-97d0-11eb-9c37-0998e22c162a.png)
+
+![image](https://user-images.githubusercontent.com/77317312/113846657-ae1c9580-97d1-11eb-833d-20bf5353532e.png)
+- 대용량의 데이터를 처리할 때 사용하는 프레임워크 40% 이상은 꼭 
+- 어떻게 처리 되는지 이해
+
+![image](https://user-images.githubusercontent.com/77317312/113846875-e1f7bb00-97d1-11eb-9872-78860f45d066.png)
+- 전체적인 파이프라인
+- 데이터 파이프라인 구축
+![image](https://user-images.githubusercontent.com/77317312/113846915-ed4ae680-97d1-11eb-883c-3793596d84f5.png)
+![image](https://user-images.githubusercontent.com/77317312/113847051-0b184b80-97d2-11eb-9566-cd28e2f7a369.png)
+- 클라우드상의 등등..정석 ㄴㄴ 
+- 데이터 파이프라인 구축
+
+
+
+1. 클라우드 기반 기술 활용(k8s, Docker) - 반드시
+  - 데이터의 양이 많기때문에 실시간으로 대용량의 데이터를 처리하기 위해
+  - 찾아보자
+2. query, quert and query(꼭 알아야한다 중요)
+
+3. 알고리즘에 이해도 중요하지만 다들 잘한다.
+- 실제로 원하는 것은 데이터의 전체적인 맥락을 이해
+- 개발은 기본, 데이터는 무조건
+
+![image](https://user-images.githubusercontent.com/77317312/113848505-84646e00-97d3-11eb-834d-2641850cfd4d.png)
+![image](https://user-images.githubusercontent.com/77317312/113848614-a2ca6980-97d3-11eb-8d35-b95103d225ed.png)
+- 더러운 데이터를 다루는 것을 두려워하지말자
+
+# 처음엔 kaggle등 으로 트레이닝 대신 안주 ㄴㄴ
+# 실제 데이터를 어디서 얻을수 있을지 (공공데이터포털 or 직접 서비스 만들기)
+- startup같은데 오퍼 보내보자 데이터 핸들링해보고 싶다고
+- 작은 프로젝트라도 만들어보자
+
+-----------
+# 주의해야할 것
+- 이런것을 버리자
+- 내 일이 아닌데? 라는 생각
+- 어떤 가설을 인증하기 위해 이 알고리즘을 사용하는지 알자
+  - 목표설정 어떤 문제를 해결해야되지?
+--------------
+# 꼭해야할 것
+1. 시스템 이해 = 데이터 플로우 이해
+  - 기존에 있던 시스템을 읽을수 있어야한다.
+2. DB테이블간 관계 이해
+3. 사용한 ML알고리즘 이해
+
+![image](https://user-images.githubusercontent.com/77317312/113849917-e4a7df80-97d4-11eb-813f-1ae62296b5fb.png)
+![image](https://user-images.githubusercontent.com/77317312/113850026-fee1bd80-97d4-11eb-90be-6e2e7b8b6c85.png)
+- 이거 작성하는 연습을 많이 하자
+
+
+![image](https://user-images.githubusercontent.com/77317312/113850927-eb832200-97d5-11eb-8ef6-e8c38f7f8f3d.png)
+
+1. what
+- 무엇을 해결하려고?
+- 무엇을 적용했는가?
+- 적용후, 얻은 결과는 무엇인가?
+- 명확하게 인지를 하고 정리를 하는게 정말 중요! 평가도!
+
+2. why
+- 왜 이 문제를 해결하려고 했는가?
+- 문제 해결을 위해 왜 이것을 적용했는가?
+
+3. how
+- 어떻게 이문제를 해결하려고 했는가?
+- 문제해결을 위해 what을 어떻게 적용했는가?
+
+4. 평가 (무조건 정리)정리하는 습관
+- 장점, 약점
+
+![image](https://user-images.githubusercontent.com/77317312/113851015-035aa600-97d6-11eb-85c2-f8c6de9e3ef6.png)
+![image](https://user-images.githubusercontent.com/77317312/113851087-15d4df80-97d6-11eb-8eb3-09180b626df0.png)
+![image](https://user-images.githubusercontent.com/77317312/113851168-30a75400-97d6-11eb-853d-ec62d369d769.png)
+
+# 꼭해야할 것
+1. Quert master
+
+2. 사용 ml 알고리즘 정리
+
+3. 클라우드 아키텍팅 w/k8s & docker
+
+4. 기억보다 기록
+- 모든 개발에 관련된 모든 것
+4-1. 나의 개발 기록은 나의 개발 히스토리
+4-2. 개인 개발 기록 뿐 아니라 팀 개발기록도 나의 개발 히스토리다.
+- github, gitlab, notion
+
+# 내가 했던 프로젝트 기록
+- 한줄이라도
+![image](https://user-images.githubusercontent.com/77317312/113851877-e7a3cf80-97d6-11eb-8d6c-f12fdf90cf4e.png)
+
+# 개발 블로그
+- 블로그에 프로젝트 기록한것 정리하자
+- medium, githubpages, brunch
+
+![image](https://user-images.githubusercontent.com/77317312/113852244-4ec18400-97d7-11eb-860e-bf7c6f9b49d7.png)
+# 아키텍팅은 진짜 열심히 잘 필수 꼭!!
+
+
+- actizen@g.skku.edu
