@@ -3,7 +3,7 @@
 
 ## 2. 가상환경 만들기 `-n` : 환경이름,  
 - ![image](https://user-images.githubusercontent.com/77317312/111431543-44afe680-873f-11eb-945b-f04127f2dbd3.png)
-
+- 파이썬 버전 3.8.5 ㄱㄱ
 ## 3. 이름으로 환경 들어가기
 - ![image](https://user-images.githubusercontent.com/77317312/111430936-74aaba00-873e-11eb-84bf-07f888a4781a.png)
 
