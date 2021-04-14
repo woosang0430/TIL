@@ -2,9 +2,9 @@
 - ![image](https://user-images.githubusercontent.com/77317312/114494613-a0df2b00-9c57-11eb-9ea5-f5e4a3e7a011.png)
 - 일단은 콘다로 설치해보자
 - ![image](https://user-images.githubusercontent.com/77317312/114494723-cbc97f00-9c57-11eb-9ab4-92848810e7c8.png)
-- `conda install -c conda-forge 패키지명`
+- `conda install -c conda-forge 패키지명=버전` <= 이퀄 하나
 - 주피터에서 설치할 경우
-   - `conda install -y -c conda-forge 패키지명`
+   - `conda install -y -c conda-forge 패키지명=버전`
    - 주피터에서는 yes를 미리 명령어로 같이 넣어준다.
 # 그리고 setuptools도 확인 ㄱㄱ
 - ![image](https://user-images.githubusercontent.com/77317312/114494844-ff0c0e00-9c57-11eb-9228-ec1d25437260.png)
