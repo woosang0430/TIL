@@ -174,3 +174,236 @@ plt.grid(True)
 plt.show()
 ```
 - ![image](https://user-images.githubusercontent.com/77317312/115238605-d48aeb00-a158-11eb-8167-3f3f665981a5.png)
+## 2. Classification - Fashion MNIST Dataset - 다중 분류
+- 다중 분류의 loss 값
+  - y를 one hot encoding 한 경우 : `categorical_crossentropy`
+  - y를 one hot encoding 안한 경우 : `sparse_categorical_crossentropy`
+```python
+class_names = ['T-shirt/top', 'Trousers', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+
+np.random.seed(1)
+tf.random.set_seed(1)
+
+# 데이터 셋 읽기
+(X_train, y_train), (X_test, y_test) = keras.datasets.fashion_mnist.load_data()
+X_train.shape, X_test.shape
+## >>> ((60000, 28, 28), (10000, 28, 28))
+
+# 하이퍼파라미터 설정
+LEARNING_RATE = 0.001
+N_EPOCHS = 50
+N_BATCHS = 100
+
+N_CLASS = 10 # CLASS CATEGORY의 개수
+N_TRAIN = X_train.shape[0]
+N_TEST = X_test.shape[0]
+IMAGE_SIZE = 28
+
+# 데이터 전처리
+# X(이미지) : 0 ~ 255 => 0 ~ 1
+X_train = X_train/255.
+X_test = X_test/255.
+
+# y => one hot encoding
+y_train = keras.utils.to_categorical(y_train)
+y_test = keras.utils.to_categorical(y_test)
+
+# Dataset
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train, y_train))\
+                               .shuffle(N_TRAIN)\
+                               .batch(N_BATCHS, drop_remainder=True)\
+                               .repeat()
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test, y_test)).batch(N_BATCHS)
+
+# 모델 구현
+def create_model():
+  model = keras.Sequential()
+  
+  # input layer
+  model.add(keras.layers.Input((28,28))
+  model.add(keras.layers.Flatten())
+  
+  # hidden layer
+  model.add(keras.layers.Dense(256, activation='relu'))
+  model.add(keras.layers.Dense(128, activation='relu'))
+  model.add(keras.layers.Dense(64, activation='relu'))
+  
+  # output layer
+  model.add(keras.layers.Dense(N_CLASS, activation='softmax'))
+  
+  # compile
+  model.compile(optimizer=keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+                loss='categorical_crossentropy',
+                metrics=['accuracy'])
+  
+  return model
+  
+
+model = create_model()
+model.summary()
+"""
+Model: "sequential_5"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+flatten_4 (Flatten)          (None, 784)               0         
+_________________________________________________________________
+dense_18 (Dense)             (None, 256)               200960    
+_________________________________________________________________
+dense_19 (Dense)             (None, 128)               32896     
+_________________________________________________________________
+dense_20 (Dense)             (None, 64)                8256      
+_________________________________________________________________
+dense_21 (Dense)             (None, 10)                650       
+=================================================================
+Total params: 242,762
+Trainable params: 242,762
+Non-trainable params: 0
+_________________________________________________________________
+"""
+
+# 학습, steps 계산
+steps_per_epoch = N_TRAIN//N_BATCHS
+validation_steps = int(np.ceil(N_TEST/N_BATCHS))
+
+history = model.fit(train_dataset,
+                    epochs=N_EPOCHS,
+                    steps_per_epoch=steps_per_epoch,
+                    validation_data=test_dataset,
+                    validation_steps=validation_steps)
+                    
+# 평가
+model.evaluate(test_dataset)
+
+# 결과 시각화 메소드
+def plot_result(history):
+  import matplotlib.pyplot as plt
+  plt.figure(figsize=(15,6))
+  
+  plt.subplot(1,2,1)
+  plt.plot(range(1, N_EPOCHS+1), history['loss'], label='train_loss')
+  plt.plot(range(1, N_EPOCHS+1), history['val_loss'], label='val_loss')
+  plt.title('loss')
+  plt.legend()
+  
+  plt.subplot(1,2,2)
+  plt.plot(range(1, N_EPOCHS+1), history['accuracy'], label='train_accuracy')
+  plt.plot(range(1, N_EPOCHS+1), history['accuracy'], label='val_accuracy')
+  plt.title('accuracy')
+  plt.legend()
+  
+  plt.tight_layout()
+  plt.grid(True)
+  plt.show()
+  
+plot_result(history)
+```
+- ![image](https://user-images.githubusercontent.com/77317312/115401683-a0313080-a225-11eb-9f83-51aa45a873bc.png)
+
+## 3. IMDB 감성분석 - 이진분류
+```python
+# 데이터 로드
+import pickle
+
+with open('imdb_dataset/X_train.pkl', 'rb') as f:
+  X_train = pickle.load(f)
+
+with open('imdb_dataset/X_test.pkl', 'rb') as f:
+  X_test = pickle.load(f)
+  
+with open('imdb_dataset/y_train.pkl', 'rb') as f:
+  y_train = pickle.load(f)
+
+with open('imdb_dataset/y_test.pkl', 'rb') as f:
+  y_test = pickle.load(f)
+  
+# X -> 벡터화(숫자 변경)
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf = TfidfVectorizer(max_features=10000)
+tfidf.fit(X_train+X_test)
+
+X_train_tfidf = tfidf.transform(X_train)
+X_test_tfidf = tfidf.transform(X_test)
+
+# 하이퍼파라미터 설정
+LEARNING_RATE = 0.001
+N_EPOCHS = 10
+N_BATCHS = 250
+
+N_TRAIN = X_train_tfidf.shape[0]
+N_TEST = X_test_tfidf.shape[0]
+N_FEATURE = X_train_tfidf.shape[1]
+
+# dataset
+train_dataset = tf.data.Dataset.from_tensor_slices((X_train_tfidf.toarray(), y_train))\
+                               .shuffle(N_TRAIN)
+                               .batch(N_BATCHS, drop_remainder=True)\
+                               .repeat()
+test_dataset = tf.data.Dataset.from_tensor_slices((X_test_tfidf.toarray(), y_test)).batch(N_BATCHS)
+
+# 모델 생성
+def create_model():
+  model = keras.Sequential()
+  # input layer
+  model.add(keras.layers.Input((N_FEATURE,))
+  
+  # hidden layer
+  model.add(keras.layers.Dense(512, activation='relu'))
+  model.add(keras.layers.Dense(256, activation='relu'))
+  model.add(keras.layers.Dense(256, activation='relu'))
+  model.add(keras.layers.Dense(128, activation='relu'))
+  
+  # output layer
+  model.add(keras.layers.Dense(1, activation='sigmoid'))
+  
+  # compile
+  model.complie(optimizer=keras.optimizers.Adam(learing_rate=LEARING_RATE),
+                loss='binary_crossentropy',
+                metrics=['accuracy'])
+  
+  return model
+  
+model = create_model()
+model.summary()
+"""
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense (Dense)                (None, 512)               5120512   
+_________________________________________________________________
+dense_1 (Dense)              (None, 256)               131328    
+_________________________________________________________________
+dense_2 (Dense)              (None, 256)               65792     
+_________________________________________________________________
+dense_3 (Dense)              (None, 128)               32896     
+_________________________________________________________________
+dense_4 (Dense)              (None, 1)                 129       
+=================================================================
+Total params: 5,350,657
+Trainable params: 5,350,657
+Non-trainable params: 0
+_________________________________________________________________
+"""
+
+steps_per_epoch = N_TRAIN//N_BATCHS
+validation_steps = int(np.ceil(N_TEST/N_BATCHS))
+
+# 학습
+history = model.fit(train_dataset,
+                    epoch=N_EPOCHS,
+                    steps_per_epoch=steps_per_epoch,
+                    validataion_data=test_dataset,
+                    validataion_steps=validation_steps)
+
+# 평가
+model.evaluate(val_dataset)
+
+# 결과 시각화
+plot_result(history)
+```
+- ![image](https://user-images.githubusercontent.com/77317312/115404676-847b5980-a228-11eb-887c-273a84c30d76.png)
