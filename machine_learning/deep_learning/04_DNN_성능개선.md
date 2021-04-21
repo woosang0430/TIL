@@ -59,7 +59,28 @@ def create_model():
   model.add(keras.layers.Input((IMAGE_SIZE, IMAGE_SIZE))
   model.add(keras.layers.Flatten()
   # Hidden layer
-  model.add
+  model.add(keras.layers.Dense(512, activation='relu'))
+  model.add(keras.layers.Dense(512, activation='relu'))
+  model.add(keras.layers.Dense(256, activation='relu'))
+  model.add(keras.layers.Dense(256, activation='relu'))
+  model.add(keras.layers.Dense(128, activation='relu'))
+  model.add(keras.layers.Dense(128, activation='relu'))
+  model.add(keras.layers.Dense(8, activation='relu'))
+  # output layer
+  model.add(keras.layers.Dense(N_CLASS, activation='softmax'))
+  # model compile
+  model.compile(optimizer=keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+                loss='categorical_crossentropy',
+                metrics=['accuracy'])
+  return model
+  
+model = create_model()
+
+history = model.fit(train_dataset,
+                    epochs=N_EPOCHS,
+                    steps_per_epoch=steps_per_epoch,
+                    validation_data=val_dataset,
+                    validation_steps=validation_steps)
 ```
 - ![image](https://user-images.githubusercontent.com/77317312/115539001-6f113880-a2d7-11eb-8003-68bb286eed51.png)
 
@@ -77,7 +98,6 @@ def create_model():
 - dropout 비율은 0 ~ 1 사이 실수로 지정하는데 보통 0.2 ~ 0.5 사이의 값을 지정
 - dropout이 적용된 모델을 학습 시킬 때는 epoch수를 더 늘려준다.
 ```python
-
 
 ```
 
