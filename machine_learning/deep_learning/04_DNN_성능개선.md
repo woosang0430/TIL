@@ -98,9 +98,51 @@ history = model.fit(train_dataset,
 - dropout 비율은 0 ~ 1 사이 실수로 지정하는데 보통 0.2 ~ 0.5 사이의 값을 지정
 - dropout이 적용된 모델을 학습 시킬 때는 epoch수를 더 늘려준다.
 ```python
+DROPOUT_RATE = 0.5
 
+DROPOUT_RATE = 0.3
+def create_dropout_model():
+    model = keras.Sequential()
+    # input
+    model.add(keras.layers.Input((IMAGE_SIZE, IMAGE_SIZE)))
+    model.add(keras.layers.Flatten())
+    
+    # Hidden
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(512, activation='relu'))
+    
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(512, activation='relu'))
+    
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(256, activation='relu'))
+    
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(256, activation='relu'))
+    
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(128, activation='relu'))
+    
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(128, activation='relu'))
+    
+    # output
+    model.add(keras.layers.Dropout(rate=DROPOUT_RATE))
+    model.add(keras.layers.Dense(N_CLASS, activation='softmax'))
+    
+    # compile
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    return model
+  
+history = model.fit(train_dataset,
+                    epochs=N_EPOCHS,
+                    steps_per_epoch=steps_per_epoch,
+                    validation_data=val_dataset,
+                    validation_steps=validation_steps)
 ```
-
+- ![image](https://user-images.githubusercontent.com/77317312/115691477-0ee2cb00-a399-11eb-8dd9-de60af957781.png)
 
 ## 3. Batch Normalization(배치정규화) * 일반적으로 많이 사용됨
 - 각 layer에서 출력된 값을 평균=0, 표준편차=1로 정규화 하여 **각 layer의 입력분포를 균일하게 만듬** == scaling
@@ -123,9 +165,51 @@ history = model.fit(train_dataset,
 - 학습하는 동안 과대적합에 대한 규제의 효과를 준다.
 - Gradient Vanishing, Gradient exploding을 막아준다.
 ```python
+def create_BN_model():
+    model = keras.Sequential()
 
+    model.add(keras.layers.Input((IMAGE_SIZE, IMAGE_SIZE)))
+    model.add(keras.layers.Flatten())
+
+    # Hidden layer
+    model.add(keras.layers.Dense(512)) # Fully Connected Layer(Dense Layer)
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU()) # Activation  Layer
+    # model.add(keras.layers.Activation('relu'))
+    
+    model.add(keras.layers.Dense(512))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(256))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(256))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(128))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+
+    model.add(keras.layers.Dense(128))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+
+    # Output
+    model.add(keras.layers.Dense(N_CLASS))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Softmax()) # keras.layers.Activation('sigmoid')
+
+    # compile
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    return model
 
 ```
+- ![image](https://user-images.githubusercontent.com/77317312/115691663-39348880-a399-11eb-814e-db5315eaa352.png)
 
 ## 4. Learning Rate Decay(학습율 조절)을 통한 성능향상
 - ![image](https://user-images.githubusercontent.com/77317312/115532723-058e2b80-a2d1-11eb-8dc6-734539ea9f49.png)
@@ -134,9 +218,108 @@ history = model.fit(train_dataset,
   - 몇 에폭마다 일정량만큼 학습 속도를 줄인다. 보통 5 에폭마다 반으로 줄이거나 20 에폭마다 1/10씩 줄이기도 한다.(튜닝대상)
   - 보통 고정된 학습 속도로 검증오차를 살펴보다가, 검증오차가 개선되지 않을 때마다 학습 속도를 감소시키는 방법을 택한다.
 ```python
+LEARNING_RATE = 0.001
+N_EPOCHS = 30
 
+def create_model():
+    model = keras.Sequential()
+    model.add(keras.layers.Input((IMAGE_SIZE, IMAGE_SIZE)))
+    model.add(keras.layers.Flatten())
+    
+    model.add(keras.layers.Dense(512, activation='relu'))
+    model.add(keras.layers.Dense(512, activation='relu'))
+    
+    model.add(keras.layers.Dense(256, activation='relu'))
+    model.add(keras.layers.Dense(256, activation='relu'))
+    
+    
+    model.add(keras.layers.Dense(128, activation='relu'))
+    model.add(keras.layers.Dense(128, activation='relu'))
+    
+    model.add(keras.layers.Dense(N_CLASS, activation='softmax'))
+    
+    return model
 
+lr_scheduler = keras.optimizers.schedules.ExponentialDecay(
+                    initial_learning_rate=LEARNING_RATE, # 시작 학습률
+                    decay_steps=steps_per_epoch * 10, # 몇 step마다 학습률을 변경할 건지(step기준)
+                    decay_rate=0.5, # 학습 변화율
+                    staircase=True)
+
+model = create_model()
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr_scheduler),
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+model.fit(train_dataset,
+          epochs=N_EPOCHS,
+          steps_per_epoch=steps_per_epoch,
+          validation_data=val_dataset,
+          validation_steps=validation_steps)
 ```
+- ![image](https://user-images.githubusercontent.com/77317312/115709217-e87a5b00-a3ab-11eb-8c75-752799a4a621.png)
+### BATCH NORMALIZATION & EXPONENTIALDECAY
+```python
+LEARNING_RATE = 0.001
+N_EPOCHS = 30
+
+def create_model():
+    model = keras.Sequential()
+    # input
+    model.add(keras.layers.Input((IMAGE_SIZE, IMAGE_SIZE)))
+    model.add(keras.layers.Flatten())
+    
+    # hidden
+    model.add(keras.layers.Dense(512))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(512))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(256))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(256))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    
+    model.add(keras.layers.Dense(128))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    model.add(keras.layers.Dense(128))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.ReLU())
+    
+    # output
+    model.add(keras.layers.Dense(N_CLASS))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Softmax())
+    
+    return model
+
+lr_scheduler = keras.optimizers.schedules.ExponentialDecay(
+                    initial_learning_rate=LEARNING_RATE, # 시작 학습률
+                    decay_steps=steps_per_epoch * 10, # 몇 step마다 학습률을 변경할 건지(step기준)
+                    decay_rate=0.5, # 학습 변화율
+                    staircase=True)
+
+model = create_model()
+model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr_scheduler),
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+model.fit(train_dataset,
+          epochs=N_EPOCHS,
+          steps_per_epoch=steps_per_epoch,
+          validation_data=val_dataset,
+          validation_steps=validation_steps)
+```
+- ![image](https://user-images.githubusercontent.com/77317312/115709367-1b245380-a3ac-11eb-88ec-e67430b1eab6.png)
 
 ## 결론. Hyper Parameter tuning
 - parameters
