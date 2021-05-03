@@ -4,7 +4,7 @@
 ## 2. 가상환경 만들기 `-n` : 환경이름,  
 - ![image](https://user-images.githubusercontent.com/77317312/111431543-44afe680-873f-11eb-945b-f04127f2dbd3.png)
 - ![image](https://user-images.githubusercontent.com/77317312/116832906-83b3d180-abf1-11eb-8465-273e6305077a.png)
-- 파이썬 버전 3.8.5 ㄱㄱ
+
 ## 3. 이름으로 환경 들어가기
 - ![image](https://user-images.githubusercontent.com/77317312/111430936-74aaba00-873e-11eb-84bf-07f888a4781a.png)
 
@@ -25,16 +25,15 @@
 - ![image](https://user-images.githubusercontent.com/77317312/116833000-210f0580-abf2-11eb-906c-d0219d01d5c6.png)
 
 
-## 번외. 원하는 디렉토리에서 환경 시작하고 싶으면?
-1. 프롬포트에서 cmd로 경로 설정
-
-2. 탐색기에서 원하는 디렉토리로 가서 경로에 cmd치면 됨
+## 번외. 
+1. 원하는 디렉토리에서 환경 시작하고 싶으면?
+- 탐색기에서 원하는 디렉토리로 가서 경로에 cmd치면 됨
 - ![image](https://user-images.githubusercontent.com/77317312/111434825-5b583c80-8743-11eb-884d-6eec285cef17.png)
 
-3. 가상 환경 matplotlib 라이브러리 다운 받으면 폰트 설정
+2. 가상 환경 matplotlib 라이브러리 다운 받으면 폰트 설정
 - ![image](https://user-images.githubusercontent.com/77317312/116833256-3c2e4500-abf3-11eb-8ee6-f41e308a71a9.png)
-- matplotlibrc를 메모장으로 열기
+- 위 사진 디렉토리 경로 가서 matplotlibrc를 메모장으로 열기
 - `ctrl + F` 눌러서 family, minus 찾기
 - 아래와 같이 수정(앞에 `#`은 제거)
-- font.family:  malgun gothic
-- axes.unicode_minus: False
+- `font.family:  malgun gothic`
+- `axes.unicode_minus: False`
