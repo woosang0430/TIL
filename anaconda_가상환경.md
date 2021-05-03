@@ -34,6 +34,7 @@
 3. 가상 환경 matplotlib 라이브러리 다운 받으면 폰트 설정
 - ![image](https://user-images.githubusercontent.com/77317312/116833256-3c2e4500-abf3-11eb-8ee6-f41e308a71a9.png)
 - matplotlibrc를 메모장으로 열기
+- `ctrl + F` 눌러서 family, minus 찾기
+- 아래와 같이 수정(앞에 `#`은 제거)
 - font.family:  malgun gothic
 - axes.unicode_minus: False
-- 앞의 `#`은 제거 하고 와 같이 수정
