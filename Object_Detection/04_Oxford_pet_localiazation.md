@@ -376,3 +376,226 @@ for image, gt in val_dataset.take(3): # 반복 3번 - 한번 반복할 때 마�
 ```
 - ![image](https://user-images.githubusercontent.com/77317312/117962035-bc724a00-b359-11eb-9f76-c8e4e6b3d090.png)
 - ...
+## 모델 생성 및 학습
+```python
+from tensorflow.keras import optimizers
+from tensorflow.keras.applications import ResNet101v2
+from tensorflow.keras.layers import Conv2D, ReLU, MaxPooling2D, Dense, BatchNormalization, GlobalAveragePooling2D, Concatenate
+from tensorflow import keras
+
+def create_l_model():
+  resnet101v2 = ResNet101v2(include_top=False, weights='imageNet', input_shape=(IMG_SIZE, IMG_SIZE, 3))
+  model = keras.models.Sequentail()
+  model.add(resnet101v2)
+  model.add(GlobalAveragePooling2D()) # 채널(depth) 수가 많을때는 GlobalAveragePooling 사용
+  model.add(Dense(256))
+  model.add(BatchNormalization())
+  model.add(ReLU())
+  model.add(Dense(64))
+  model.add(BatchNormalization())
+  model.add(ReLU())
+  
+  # output layer(x, y, w, h) -> units를 4, 각각 출력값이 0 ~ 1 사이의 값으로 normalize되어있으므로 출력결과도 scale에 맞추기 위해 sigmoid 활성함수 사용
+  # localization 문제(위치-좌표, 너비, 높이 예측) -> 회귀(Regression 문제)
+  model.add(Dense(4, activation='sigmoid'))
+  return model
+  
+model = create_model()
+
+# 모델 컴파일
+## learning rate scheduing
+lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=LEARNING_RATE,
+                                                          decay_steps=steps_per_epoch*10,
+                                                          decay_rate=0.5,
+                                                          staircase=True)
+model.compile(optimizers.Adam(lr_schedule), loss='mse') # 회귀 문제이므로 Mean Squared Error
+ 
+# 학습
+filepath = r'/content/drive/MyDrive/save_models/oxford_pet_localization_resnet101v2_model'
+mc_callback = keras.callbacks.ModelCheckpoint(filepath, 'val_loss', verbose=1, save_best_only=True)
+es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, verbose=1)
+
+history = model.fit(train_dataset,
+                    steps_per_epoch = steps_per_epoch,
+                    epochs=N_EPOCHS,
+                    validation_data=val_dataset,
+                    validation_steps=validation_steps,
+                    callbacks=[mc_callback, es_callback])
+```
+
+## 확인
+```python
+# 미리 학습한 모델 다운로드
+import gdown
+url = 'https://drive.google.com/uc?id=1-2lbiHp3Sdffxkqlj4iGL9-recS6g697'
+fname = 'oxford_pet_localization_resnet101.tar.gz'
+gdown.download(url, fname, quiet=False)
+
+# 리눅스 명령어
+!mkdir models
+!tar -zxvf oxford_pet_localization_resnet101.tar.gz -C models
+
+# 저장된 모델 load
+filepath = '/content/models/oxford_pet_localization_resnet101v2_model'
+saved_model = keras.models.load_model(filepath)
+
+saved_model.summary()
+"""
+Model: "sequential"
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+resnet101v2 (Functional)     (None, 7, 7, 2048)        42626560  
+_________________________________________________________________
+global_average_pooling2d (Gl (None, 2048)              0         
+_________________________________________________________________
+dense (Dense)                (None, 256)               524544    
+_________________________________________________________________
+batch_normalization (BatchNo (None, 256)               1024      
+_________________________________________________________________
+re_lu (ReLU)                 (None, 256)               0         
+_________________________________________________________________
+dense_1 (Dense)              (None, 64)                16448     
+_________________________________________________________________
+batch_normalization_1 (Batch (None, 64)                256       
+_________________________________________________________________
+re_lu_1 (ReLU)               (None, 64)                0         
+_________________________________________________________________
+dense_2 (Dense)              (None, 4)                 260       
+=================================================================
+Total params: 43,169,092
+Trainable params: 43,070,788
+Non-trainable params: 98,304
+_________________________________________________________________
+"""
+```
+## Bounding Box 그리기
+```python
+# 예측한 bounding box와 ground truth box를 image에 같이 표시
+# 정답은 빨간색 box, 예측은 파란색 box
+idx = 0
+num_imgs - validation_steps
+for val_data, val_gt in val_dataset.take(num_imgs):
+  
+  x = val_gt[:,0]
+  y = val_gt[:,1]
+  w = val_gt[:,2]
+  h = val_gt[:,3]
+  
+  xmin = x[idx].numpy() - (w[idx].numpy() / 2.)
+  ymin = y[idx].numpy() - (h[idx].numpy() / 2.)
+  
+  rect_x = int(xmin * IMG_SIZE)
+  rect_y = int(ymin * IMG_SIZE)
+  rect_w = int(w[idx] * IMG_SIZE)
+  rect_h = int(h[idx] * IMG_SIZE)
+  
+  rect = Rectangle((rect_x, rect_y), rect_w, rect_h, fill=False, color='red')
+  plt.axes().add_patch(rect)
+  
+  prediction = saved_model.predict(val_data)
+  pred_x = prediction[:, 0]
+  pred_y = prediction[:, 1]
+  pred_w = prediction[:, 2]
+  pred_h = prediction[:, 3]
+  pred_xmin = pred_x[idx] - (pred_w[idx]/2.)
+  pred_ymin = pred_y[idx] - (pred_h[idx]/2.)
+  pred_rect_x = int(pred_xmin * IMG_SIZE)
+  pred_rect_y = int(pred_ymin * IMG_SIZE)
+  pred_rect_w = int(pred_w[idx] * IMG_SIZE)
+  pred_rect_h = int(pred_h[idx] * IMG_SIZE)
+  
+  pred_rect = Rectangle((pred_rect_x, pred_rect_y), pred_rect_w, pred_rect_h, fill=False, color='blue')
+  plt.axes().add_patch(pred_rect)
+  
+  plt.imshow(val_data[idx])
+  plt.show()
+```
+- ![image](https://user-images.githubusercontent.com/77317312/117987889-db7ed500-b375-11eb-9439-879bbaa703ba.png)
+- ...
+## IoU 확인
+```python
+## Validation set의 IoU 계산
+avg_iou = 0
+num_imgs = validation_steps
+# N_VAL = validation data 개수 % batch_size = 마지막 배치의 데이터 개수
+res = N_VAL % N_BATCH
+
+
+for i, (val_data, val_gt) in enumerate(val_datset.take(num_imgs)):
+
+  # flag : True이면 마지막 배치의 데이터 iou퍼리, False이면 중간 배치들 데이터에 대한 iou처리
+  flag = (i == validation_steps-1)
+  # i : 현재 반복횟수 - 몇번째 배치에 대한 처리. (validation_steps-1) : 마지막 배치 순번
+  
+  # ground truth의 x, y, w, h 조회
+  x = val_gt[:, 0]
+  y = val_gt[:, 1]
+  w = val_gt[:, 2]
+  h = val_gt[:, 3]
+  # predict
+  prediction = saved_model.predict(val_data)
+  # 예측 결과 : x, y, w, h
+  pred_x = prediction[:, 0]
+  pred_y = prediction[:, 1]
+  pred_w = prediction[:, 2]
+  pred_h = prediction[:, 3]
+  for idx in range(N_BATCH):
+    if flag: # True : 마지막 배치 처리
+      if idx == res: # True : 마지막 배치의 모든 데이터에 대해 iou 계산이 끝났다.
+        flag = False
+        break
+    
+    # 1개 이미지에 대한 IoU값 계산
+    xmin = int((x[idx].numpy() - w[idx].numpy()/2.) * IMG_SIZE)
+    ymin = int((y[idx].numpy() - h[idx].numpy()/2.) * IMG_SIZE)
+    xmax = int((x[idx].numpy() + w[idx].numpy()/2.) * IMG_SIZE)
+    ymax = int((y[idx].numpy() + h[idx].numpy()/2.) * IMG_SIZE)
+    
+    pred_xmin = int((pred_x[idx] - pred_w[idx]/2.) * IMG_SIZE)
+    pred_ymin = int((pred_y[idx] - pred_h[idx]/2.) * IMG_SIZE)
+    pred_xmax = int((pred_x[idx] + pred_w[idx]/2.) * IMG_SIZE)
+    pred_ymax = int((pred_y[idx] + pred_h[idx]/2.) * IMG_SIZE)
+    
+    # 두개 box가 겹치지 않은 경우
+    if xmin > pred_xmax or xmax < pred_xmin:
+      continue
+    if ymin > pred_ymax or ymax < pred_ymin:
+      continue
+      
+    gt_width = xmax-xmin
+    gt_height = ymax-ymin
+    pred_width = pred_xmax - pred_xmin
+    pred_height = pred_ymax - pred_ymin
+    
+    # 교집합 영역의 width, height 구하기
+    inter_width = np.min((xmax, pred_xmax)) - np.max((xmin, pred_xmin))
+    inter_height = np.min((ymax, pred_ymax)) - np.max(ymin, pred_ymin))
+    
+    iou = (inter_width * inter_height)/((gt_width * gt_height) + _pred_width * pred_height) - (inter_width * inter_height))
+    
+    avg_iou += iou / N_VAL
+    
+print(avg_iou)
+## >>> 0.7608909660148577
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
