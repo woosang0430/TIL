@@ -579,23 +579,275 @@ for i, (val_data, val_gt) in enumerate(val_datset.take(num_imgs)):
 print(avg_iou)
 ## >>> 0.7608909660148577
 ```
+## Classification을 추가하여 Multi-task Learning으로 Localization 학습하기
+- 고양이/개 2개 class로 classification
+```python
+from tensorflow.keras import optimizers
+from tensorflow.keras.applications import  ResNet101V2
+from tensorflow.keras.layers import Cov2D, ReLU, MaxPooling2D, Dense, BatchNormalization, GlobalAveragePooling2D, Concatenate
+from tensorflow import keras
 
+# tfrecord parsing function(classification + localization)
+def _parse_function(tfrecord_serialized):
+  features={'image' : tf.io.FixedLenFeature([], tf.string),
+            'cls_num' : tf.io.FixedLenFeature([], tf.int64),
+            'bi_cls_num' : tf.io.FixedLenFeature([], tf.int64),
+            'x' : tf.io.FixedLenFeature([], tf.float32),
+            'y' : tf.io.FixedLenFeature([], tf.float32),
+            'w' : tf.io.FixedLenFeature([], tf.float32),
+            'h' : tf.io.FixedLenFeature([], tf.float32)
+            }
+   parsed_features = tf.io.parse_single_example(tfrecord_serialized, features)
+   
+   image = tf.io.decode_ras(parsed_features['image'], tf.uint8)
+   image = tf.reshape(image, [IMG_SIZE, IMG_SIZEe, 3])
+   image = tf.cast(image, tf.float32)/255.
+   
+   cls_label = tf.cast(parsed_features['cls_num'], tf.float32)
+   bi_cls_label = tf.cast(parsed_features['bi_cls_num'], tf.float32)
+   
+   x = tf.cast(parsed_features['x'], tf.float32)
+   y = tf.cast(parsed_features['y'], tf.float32)
+   w = tf.cast(parsed_features['w'], tf.float32)
+   h = tf.cast(parsed_features['h'], tf.float32)
+   ground_truth = tf.stack([bi_cls_label, x, y, w, h], -1)
+   
+   return image, ground_truth
+```
+#### Dataset 생성
+```python
+# Train Dataset 생성
+train_dataset = tf.data.TFRecordDataset(tfr_train_dir)
+train_dataset = train_dataset.map(_parse_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+train_dataset = train_dataset.shuffle(buffer_size=N_TRAIN).prefetch(tf.data.experimental.AUTOTUNE).batch(N_BATCH).repeat()
 
+# Validation dataset 생성
+val_dataset = tf.data.TFRecordDataset(tfr_val_dir)
+val_dataset = val_dataset.map(_parse_function, num_parallel_calls=tf.data.experimental.AUTOTUNE)
+val_dataset = val_datset.batch(N_BATCH).repeat()
 
+def create_cl_model():
+  resnet101v2 = ResNet101V2(include_top=False, weights='imagenet', input_shape=(IMG_SIZE, IMG_SIZE, 3))
+  gap = GlobalAveragePooling2D()(resnet101v2.output)
+  
+  # classification path
+  dense_b1_1 = Dense(256)(gap)
+  bn_b1_2 = BatchNormalization()(dense_b1_1)
+  relu_b1_3 = ReLU()(bn_b1_2)
+  dense_b1_4 = Dense(64)(relu_b1_3)
+  bn_b1_5 = BatchNormalization()(dense_b1_4)
+  relu_b1_6 = ReLU()(bn_b1_5)
+  output1 = Dense(2, activation='softmax', name='output1')(relu_b1_6)
+  # classification 출력 (2진분류 -> 다중분류 결과로 만들기 - dog 확률, cat확률)
+  
+  # localization
+  dense_b2_1 = Dense(256)(gap)
+  bn_b2_2 = BatchNormalization()(dense_b2_1)
+  relu_b2_3 = ReLU()(bn_b2_2)
+  dense_b2_4 = Dense(64)(relu_b2_3)
+  bn_b2_5 = BatchNormalization()(dense_b2_4)
+  relu_b2_6 = ReLU()(bn_b2_5)
+  output2 = Dense(4, activation='sigmoid', name='output2')(relu_b2_6)
+  # localization 출력. 좌표 0 ~ 1 normalization 되어있으므로 scale을 맞추기 위해 sigmoid사용
+  
+  concat = Concatenate(name='finaly_output')([output1, output2])
+  return keras.Model(inputs=resnet101v2.input, outputs=concat)
+  
+model = create_cl_model()
+```
+#### loss 함수 구현
+- 2가지의 오차를 계산하기 위해
+- 분류, 회귀
+```python
+# loss 함수 구현
+def loss_fn(y_true, y_pred):
+  """
+  [매개변수]
+    y_true : ndarray -> ground truth(정답)
+    y_pred : ndarray -> 모델이 예측한  결과
+  [반환값]
+    실수(float) -> y_true와 y_pred 사이의 오차
+  """
+  cls_labels = tf.cast(y_true[:, :1], tf.int64) # ground  truth의 분류관련 y값(index 0)
+  loc_labels = y_true[:, 1:] # Ground Truth의 x, y, w, h 좌표
+  
+  cls_preds = y_pred[:, :2] # predict 분류관련 y값
+  loc_preds = y_pred[:, 2:] # predict 결과 좌표
+  cls_loss = tf.keras.losses.SparseCatagoricalCrossentropy()(cls_labels, cls_preds)
+  loc_loss = tf.keras.losses.MeanSquaredError()(loc_labels, loc_preds)
+  return cls_loss + 5*loc_loss # 두 loss를 더해 반환 (한쪽 loss에 가중치를 주고 싶은 경우 다 크게 만들어 더한다.)
+  
+# 모델 컴파일
+## learning rate scheduling
+lr_schedule = keras.optimizers.shedules.ExponentialDecay(initial_learning_rate=LEARNING_RATE,
+                                                         decay_steps=steps_per_epoch * 10,
+                                                         decay_rate=0.5,
+                                                         staircase=True)
+model.compile(optimizers.Adam(lr_schedule), loss=loss_fn)
+```
+#### 학습
+```python
+filepath2 = r'/content/drive/MyDrive/save_models/oxford_per_localization_classification_resnet101v2_weight/oxford_pet_loc_weights.ckpt'
+mc_callback = keras.callbacks.ModelCheckpoint(filepath2, 'val_loss', verbose=1, save_best_only=True, save_weights_only=True)
+es_callback = keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, verbose=1)
 
+N_EPOCHS = 1
+history = model.fit(train_dataset, steps_per_epoch=steps_per_epoch,
+                    epochs=N_epochs,
+                    validation_data=val_datset,
+                    validation_steps=validation_steps,
+                    callbacks=[mc_callback, es_callback])
+```
+## 확인
+- 미리 학습된 weights 가져와서 평가
+```python
+# 미리학습한 모델 다운로드
+import gdown
+url = 'https://drive.google.com/uc?id=1ycRNri9Gr6QjcOFv4GQi_DLCU17jbOyo'
+fname = 'oxford_per_classification_localization_resnet101_weight.tar.gz'
+gdown.download(url, fname, quiet=False)
 
+# 리눅스 명령어
+!mkdir models
+# 압축풀기
+!tar -zxvf oxford_per_classification_localization_resnet101_weight.tar.gz -C models
 
+# 마지막으로 저장된 checkpoint 경로 확인
+best_weight_path = tf.train.latest_checkpoint('/content/models/oxford_pet_localization_classification_resnet101v2_weights')
 
+# 저장된 weight load
+saved_model2 = create_cl_model()
+saved_model2.load_weights(best_weight_path)
+```
+## Bounding box 확인
+```python
+# 배치중 idx번째 것만 확인
+idx = 0
+num_imgs = validation_steps
 
+for val_data, val_gt in val_dataset.take(num_imgs):
+  gt_cls_name = np.where(val_gt[:, 0]==0, 'dog', 'cat')
+  
+  x = val_gt[idx, 1]
+  y = val_gt[idx, 2]
+  w = val_gt[idx, 3]
+  h = val_gt[idx, 4]
+  xmin = x.numpy() - w.numpy()/2.
+  ymin = y.numpy() - h.numpy()/2.
+  rect_x = int(xmin * IMG_SIZE)
+  rect_y = int(ymin * IMG_SIZE)
+  rect_w = int(w.numpy() * IMG_SIZE)
+  rect_h = int(w.numpy() * IMG_SiZE)
+  
+  rect = Rectangle((rect_x, rect_y), rect_w, rect_h, fill=False, color='red')
+  plt.axes().add_patch(rect)
+  
+  predict = saved_model2.predict(val_data)
+  
+  pred_cls_idx = np.argmax(prediction[:, :2], axis=-1)
+  pred_cls_name = np.where(pred_cls_idx==0, 'dog', 'cat')
+  
+  pred_x = prediction[idx, 2]
+  pred_y = prediction[idx, 3]
+  pred_w = prediction[idx, 4]
+  pred_h = prediction[idx, 5]
+  pred_xmin = pred_x - pred_w/2.
+  pred_ymin = pred_y - pred_h/2.
+  pred_rect_x = int(pred_x * IMG_SIZE)
+  pred_rect_y = int(pred_y * IMG_SIZE)
+  pred_rect_w = int(pred_w * IMG_SIZE)
+  pred_rect_h = int(pred_h * IMG_SIZE)
+  
+  pred_rect = Rectangle((pred_rect_x, pred_rect_y), pred_rect_w, pred_rect_h, fill=False, color='blue')
+  plt.axes().add_patch(pred_rect)
+  plt.title(f'Ground Truth-{gt_cls_name[idx]}, Pred:{pred_cls_name[idx]}')
+  
+  plt.imshow(val_data[idx])
+  plt.show()
+```
+- ![image](https://user-images.githubusercontent.com/77317312/118112641-3c62e780-b420-11eb-858e-dff0665a7a19.png)
+- ...
+### IoU 계산
+```python
+avg_iou = 0
+num_imgs = validation_steps
+res = N_VAL % N_BATCH
+for i, (val_data, val_gt) in enumerate(val_datset.take(num_imgs)):
+  flag = (i == validation_steps-1)
+  x = val_gt[:, 1]
+  y = val_gt[:, 2]
+  w = val_gt[:, 3]
+  h = val_gt[:, 4]
+  
+  prediction = saved_model2.predict(val_data)
+  
+  pred_x = prediction[:, 2]
+  pred_y = prediction[:, 3]
+  pred_w = prediction[:, 4]
+  pred_h = prediction[:, 5]
+  for idx in range(N_BATCH):
+    if (flag) and idx == res:
+      flag = False
+      break
+    xmin = int((x[idx].numpy() - w[idx].numpy()/2.)*IMG_SIZE)
+    ymin = int((y[idx].numpy() - h[idx].numpy()/2.)*IMG_SIZE)
+    xmax = int((x[idx].numpy() + w[idx].numpy()/2.)*IMG_SIZE)
+    ymax = int((y[idx].numpy() + h[idx].numpy()/2.)*IMG_SIZE)
+    
+    pred_xmin = int((pred_x[idx].numpy() - pred_w[idx]/2.)*IMG_SIZE)
+    pred_ymin = int((pred_y[idx].numpy() - pred_h[idx]/2.)*IMG_SIZE)
+    pred_xmax = int((pred_x[idx].numpy() + pred_w[idx]/2.)*IMG_SIZE)
+    pred_ymax = int((pred_y[idx].numpy() + pred_h[idx]/2.)*IMG_SIZE)
+    
+    if xmin > pred_xmax or xmax < pred_xmin:
+      continue
+    if ymin > pred_ymax or ymax < pred_ymin:
+      continue
+      
+    gt_width = xmax-xmin
+    gt_height = ymax-ymin
+    pred_width = pred_xmax - pred_xmin
+    pred_height = pred_ymax - pred_ymin
+    
+    inter_width = np.min((xmax, pred_xmax)) - np.max((xmin, pred_xmin))
+    inter_height = np.min((ymax, pred_ymax)) - np.max((ymin, pred_ymin))
+    
+    iou = (inter_width * inter_height)/((gt_width  * gt_height) + (pred_width * pred_height) - (inter_width * inter_height))
+    
+    avg_iou += iou / N_VAL
+    
+print(avg_iou)
+## >>> 0.8262356249811639
+```
+## 새로운 이미지로 test
+```python
+from PIL import image
+image = image.open('dog.jpg')
+image = image.resize((224, 224))
+image = np.array(image)
+image = image/255.
+image = image[np.newaxis, ...]
 
+# 예측 결과 확인 - bounding box, class
+import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
+prediction = saved_model2.predict(image)
+pred_cls = np.where(np.argmax(prediction[0, :2], axis=-1)==0, 'dog', 'cat')
 
+pred_x = prediction[0, 2]
+pred_y = prediction[0, 3]
+pred_w = prediction[0, 4]
+pred_h = prediction[0, 5]
+pred_xmin = pred_x - pred_w/2.
+pred_ymin = pred_y - pred_h/2.
+pred_rect_x = int(pred_xmin * IMG_SIZE)
+pred_rect_y = int(pred_ymin * IMG_SIZE)
+pred_rect_w = int(pred_w * IMG_SIZE)
+pred_rect_h = int(pred_h * IMG_SIZE)
 
-
-
-
-
-
-
-
-
-
+pred_rect = Rectangle((pred_rect_x, pred_rect_y), pred_rect_w, pred_rect_h, fill=False, color='red')
+plt.axes().add_patch(pred_rect)
+plt.imshow(image[0])
+plt.title(f'Prediction class:{pred_cls}')
+plt.show()
+```
