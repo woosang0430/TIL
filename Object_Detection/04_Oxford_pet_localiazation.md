@@ -116,7 +116,7 @@ len(image_files), len(bbox_files)
 # Egyptian_Mau_139.jpg 품종_숫자.jpg
 class_list = set() # 중복 제거를 위해
 for image_file in image_files:
-  file_name = os.path.split(image_file)[0] # 파일명 추출 Egyptian_Mau_139    .jpg
+  file_name = os.path.splitext(image_file)[0] # 파일명 추출 Egyptian_Mau_139    .jpg
   class_name = re.sub('_\d+', '', file_name) # 품종_숫자 => _숫자 제거
   class_list.add(class_name)
 class_list = list(class_list).sort()
