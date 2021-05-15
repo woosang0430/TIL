@@ -6,7 +6,7 @@
 - github :  https://github.com/Joeclinton1/google-images-download
 
 ## 설치
-- `!pip install git+https://github.com/Joeclinton1/google-images-download.git'
+- `!pip install git+https://github.com/Joeclinton1/google-images-download.git`
 - 100개 이상의 이미지를 다운받기 위해서는 Chromedriver를 받아 옵션에 설정해야한다.
   - https://chromedriver.chromium.org/downloads
 
