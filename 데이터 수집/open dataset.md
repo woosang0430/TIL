@@ -35,3 +35,8 @@
 - AIHub
   - 이미지, 텍스트, 법률, 농업, 영상, 음성 등 다양한 분야의 딥러닝 학습에 필요한 데이터를 수집 구축한 곳
   - https://aihub.or.kr/
+
+## 영상 무료 제공 사이트
+- 다음 사이트들은 영상에 저작권 없이 무료로 다운 받아 사용할 수 있는 사이트들
+  - pixabay: https://pixabay.com/ko/
+  - Unsplash: https://unsplash.com/
