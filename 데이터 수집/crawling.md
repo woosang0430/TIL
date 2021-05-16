@@ -13,7 +13,7 @@
 ## 명령프롬포트에서 실행
 - 구문
   - googleimagesdownload -- 옵션 옵션값
-  - ex) `googleimagesdownload -- keywords "Polar bears, baloons, Beaches" --limit 20 -f jpg`
+  - ex) `googleimagesdownload --keywords "Polar bears, baloons, Beaches" --limit 20 -f jpg`
     - 키워드별로 limit 개수 만큼
 - chrome driver 연동시 `--chromedriver 드라이버경로` 설정
 - `googleimagesdownload --keywords "Polar bears, baloons, Beaches" --limit 1000 --chromedriver C:\Users\domain\Dowloads\chromdriver_win32\chromedriver.exe`
@@ -72,35 +72,3 @@ args = {
 # 크롤링 시작
 path = response.download(args)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
