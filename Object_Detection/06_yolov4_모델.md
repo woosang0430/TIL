@@ -13,7 +13,7 @@ drive.mount('/content/drive')
 
 ## Yolo V4 설치
 ### Github에서 clone
-- `git clone https://github.com/AlexeyAB/darknet'
+- `git clone https://github.com/AlexeyAB/darknet`
 - yolo 공식 홈페이지 : https://pjreddie.com/darknet/yolo/
 - yolo 공식 github : https://github.com/pjreddie/darknet
   - yolo 공식 github에서는 Linux 운영체제만 지원
@@ -61,19 +61,45 @@ OPENCV = 0
 ## darknet 명령어 옵션
 - darknet 디렉토리 안에서
 - `darknet detector test <path to .data file> <path to config> <path to weights> <path to image> <flags>`
-  - <path to .data file>
-    - `.data` 파일경로 : .data파일은 train/test dataset 파일경로목록, .names 파일(클래스들 설정)등의 경로를 지정한 파일
-  - <path to config>
+  - \<path to .data file>
+    - `.data 파일경로` : .data파일은 train/test dataset 파일경로목록, .names 파일(클래스들 설정)등의 경로를 지정한 파일
+  - \<path to config>
     - `.config` 파일경로 : 모델구조, Train/Test 관련 설정파일
-  - <path to weights>
+  - \<path to weights>
     - 데이터를 학습시킨 weight 파일의 경로
-  - <path to image>
+  - \<path to image>
     - 추론(Detection)할 image 파일 경로
-  - <flag>
+  - \<flag>
     - 실행 옵션
   - detect가 끝나면 결과를 'predictions.jpg'로 저장
-  
+
 ## image detection
 ```python
-  
+# 현재 경로 확인
+%pwd
+## >>> /content/drive/MyDrive/object_detection/yolov4_object_detection_workspace
+
+# darknet으로 들어가기
+%cd darknet
+
+# darknet으로 들어가는것이 안될때(권한이 있어야됨)
+!chmod 755 ./darknet
+```
+# 권한 관련
+- 권한 확인 리눅스 명령어
+  - `!ls -al darknet`
+- 권한 관련된 것이 앞 부분에 나옴 
+  - 처음 `-` => vkdlf, `d` => directory
+  - 3개 소유권자 rw- => (읽기, 쓰기, 실행 권한 없음)
+    - `-rw------- 1 root root 6558744 May 18 05:52 darknet`
+  - 3개 소유권자 rwx => (읽기, 쓰기, 실행 권한 허용)
+    - `-rwx------ 1 root root 6558744 May 18 05:52 darknet`
+
+## 이미지 detection
+```python
+!./darknet detector test cfg/coco.data cfg/yolov4.cfg ../workspace/pretrained_weight/yolov4.weights  data/person.jpg
+```
+## 동영상 detection
+```python
+!./darknet detector demo cfg/coco.data cfg/yolov4.cfg  ../workspace/pretrained_weight/yolov4.weights   ../street.mp4   -dont_show -out_filename  ../street_result.avi
 ```
