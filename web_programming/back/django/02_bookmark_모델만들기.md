@@ -10,7 +10,7 @@
 - 데이터베이스에 무엇을 저장하고 싶다.
 - 그러면 모델(테이블)을 만들면 된다.!!
 
-### models.py
+#### bookmark/models.py
 ```python
 from django.db import models
 
@@ -46,9 +46,9 @@ class Bookmark(models.Model):
   - 모델의 내용을 반영
 
 ## 확인하기
-- admin파일에서 관리자 페이지에 들록해서
+- admin파일에서 관리자 페이지에 등록해서
 - 내가 만든 모델을 관리자 페이지에 관리할 수 있도록 등록
-### admin.py
+### bookmark/admin.py
 ```python
 from django.contrib import admin
 
@@ -75,7 +75,7 @@ admin.site.register(Bookmark)
 - bookmark를 생성하면 이렇게 뜸
 - ![image](https://user-images.githubusercontent.com/77317312/119252537-d9274100-bbe7-11eb-9589-2ed3137c6bf6.png)
 - 그런데 못생겼으니까 models 파일에서 custom해보자
-### models.py
+### bookmark/models.py
 ```python
 from django.db import models
 
