@@ -29,6 +29,6 @@
   - `admin.py` : 우리가 만든 모델을 django에 기본으로 있는 관지라 페이지에 관리하기 위해 등록해주는 역활
 
 ## app을 만든 후
-- settings.py에 등록해줘야함
-- settings파일 안에 INSTALLED_APPS리스트에 넣어주기
+- `config/settings.py`에 등록해줘야함
+- `settings`파일 안에 `INSTALLED_APPS`리스트에 넣어주기
 - ![image](https://user-images.githubusercontent.com/77317312/119233118-63c55d00-bb62-11eb-9f95-5ef49d80fb38.png)
