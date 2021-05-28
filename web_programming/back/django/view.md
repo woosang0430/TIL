@@ -142,3 +142,57 @@ path('post_list', PostListView.as_view(), name='post_list')
 - View설정시 View클래스이름.as_view() 메소드를 호출
 - as_view()는 View객체를 생성하고 dispatch()메소드를 호출
 - dipatch() 메소드는 HTTP 요청 방식에 맞는 처리 메소드를 찾아 호출한다.
+```python
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.urls import reverse
+
+from django.views.generic import ListView, View, DetailView
+from .models import Question, Choice
+
+# ListView - 모델의 전체 데이터를 조회해서 template에게 전달(paging 기능 제공)
+class QuestionListView(ListView):
+  model  = Question # 전체 데이터를 조회할 모델 클래스 지정
+  template_name = 'polls/list.html' # 응답할 template 경로
+  # 조회결과를 template에게 전달 - 이름 -> '모델클래스명(소문자)_list'로 보낸다. or 'object_list'
+
+# DetailView : 특정 모델의 Primary key를 받아 조회한 결과를 template에 전달
+# primary key는 path parameter로 받아야 한다. urls.py에서 path parameter의 변수명은 <타입 : pk>
+# question의 id(pk)를 받아 질문 하나를 조회한 후 template(vote_result.html)로 이동
+class QuestionDetailView(DetailView):
+  model = Question # 데이터를 조회할 Model 클래스 지정
+  template_name = 'polls/vote_result.html' # 이동할 template 경로
+  
+# 투표 작업 처리
+# GET 요청 : 투표 양식(vote_form)
+# POST 요청 : 투표 처리(vote)
+class VoteView(View):
+  # get방식 요청 처리
+  def get(self, request, *args, **kwargs):
+    # kwargs : path parameter를 조회
+    question_id = kwargs['question_id']
+    try:
+      question  = Question.objects.get(pk=question_id)
+      return render(request, 'polls/vote_form.html', {'question':question})
+    except:
+      return render(request, 'polls/error.html', {'error_message':'없는 질문입니다.'})
+  
+  def post(self, request, *args, **kwargs):
+    choice_id = request.POST.get('choice')
+    # 요청파라미터 검증 : choice로 넘어온 값이 없다면(None) 다시 vote_form으로 이동.
+    # question_id = request.POST.get('question_id')
+    question_id = kwargs['question_id'] # path parameter 조회
+    if not choice_id:
+      question = Question.objects.get(pk=question_id)
+      return render(request, 'polls/vote_form.html', {'question':quesion, 'error_message':'보기를 선택하세요'})
+    # update할 보기(Choice)를 조회
+    choice = Choice.objects.get(pk=choice_id)
+    choice.vote += 1
+    choice.save() # pk가 있으면 update, 없으면 insert
+    
+    url_str = reverse('polls:vote_result', args=[question_id])
+    return redirect(url_str)
+```
+### 클래스형 View를 만들었을 때 urls.py 설정
+- urls.py에서 path parameter의 변수명은 <타입 : pk>
+- ![image](https://user-images.githubusercontent.com/77317312/120011705-92877b80-c019-11eb-9dff-373df604809c.png)
