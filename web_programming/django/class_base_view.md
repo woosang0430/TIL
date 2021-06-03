@@ -143,35 +143,35 @@ class PostListView(ListView):
   #   - 이전/다음 페이지 그룹 유무(그룹의 시작/끝페이지)
   #   - 이전/다음 페이지 번호(그룹의 시작/끝페이지)
   #   - 현재 페이지에 속한 페이지 그룹의 페이지 범위(시작 ~ 끝 페이지 번호)
-def get_context_data(self, **kwargs):
-  # 부모객체의 get_context_data()를 호출해서 Generic View가 자동으로 생성한 context data를 받아온다.
-  context = super().get_context_data(**kwargs)
-  # ListView에서 paginate_by 속성을 설정하면 context data에 Paginator객체가 등록된다.
-  paginator = context['paginator']
-  page_group_count = 10 # 페이지그룹에 속한 페이지 개수
-  current_page = int(self.request.GET.get('page', 1))
-  # CBV에서 HttpRequest는 self.request로 사용할 수 있다.
-  
-  # 페이지 그룹의 페이지 범위 조회
-  start_idx = int((current_page - 1) / page_group_count) * page_group_count)
-  end_idx = start_idx + page_group_count
-  page_range = paginator.page_range[start_idx : end_idx]
-  
-  # 그룹의 시작 페이지가 이전페이지가 있는지, 그룹의 마지막 페이지가 다음 페이지가 있는지 여ㅑ부 + 페이지 번호
-  start_page = paginator.page(page_range[0]) # 시작  페이지의 Page객체
-  end_page = paginator.page(page_range[-1]) # 마지막 페이지의 Page객체
-  
-  has_previous = start_page.has_previous() # 시작의 이전페이지가 있는지 여부
-  has_next = end_page.has_next() # 마지막 페이지의 다음 페이지가 있는지 여부
-  
-  context['page_range'] = page_range
-  if has_previous:
-    context['has_previous'] = has_previous
-    context['previous_page_no'] = start_page.previous_page_number # 시작 페이지의 이전페이지 번호
-    
-  if has_next:
-    context['has_next'] = has_next
-    context['next_page_no'] = end_page.next_page_number # 마지막 페이지의 다음 페이지 번호
-    
-  return context
+  def get_context_data(self, **kwargs):
+    # 부모객체의 get_context_data()를 호출해서 Generic View가 자동으로 생성한 context data를 받아온다.
+    context = super().get_context_data(**kwargs)
+    # ListView에서 paginate_by 속성을 설정하면 context data에 Paginator객체가 등록된다.
+    paginator = context['paginator']
+    page_group_count = 10 # 페이지그룹에 속한 페이지 개수
+    current_page = int(self.request.GET.get('page', 1))
+    # CBV에서 HttpRequest는 self.request로 사용할 수 있다.
+
+    # 페이지 그룹의 페이지 범위 조회
+    start_idx = int((current_page - 1) / page_group_count) * page_group_count)
+    end_idx = start_idx + page_group_count
+    page_range = paginator.page_range[start_idx : end_idx]
+
+    # 그룹의 시작 페이지가 이전페이지가 있는지, 그룹의 마지막 페이지가 다음 페이지가 있는지 여ㅑ부 + 페이지 번호
+    start_page = paginator.page(page_range[0]) # 시작  페이지의 Page객체
+    end_page = paginator.page(page_range[-1]) # 마지막 페이지의 Page객체
+
+    has_previous = start_page.has_previous() # 시작의 이전페이지가 있는지 여부
+    has_next = end_page.has_next() # 마지막 페이지의 다음 페이지가 있는지 여부
+
+    context['page_range'] = page_range
+    if has_previous:
+      context['has_previous'] = has_previous
+      context['previous_page_no'] = start_page.previous_page_number # 시작 페이지의 이전페이지 번호
+
+    if has_next:
+      context['has_next'] = has_next
+      context['next_page_no'] = end_page.next_page_number # 마지막 페이지의 다음 페이지 번호
+
+    return context
 ```
