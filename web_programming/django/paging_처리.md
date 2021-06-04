@@ -87,29 +87,77 @@ class PostListView(ListView):
       
     return context
 ```
+## HTML에서 paging 처리
+### paging 처리
+- paginator변수 : Paginator
+- page_obj변수 : 현재 페이지의 Page 객체
+- is_paginated : 페이징 처리 유무(ListView : paginate_by 설정하면 True, 안했으면 False)
+```html
+{% extends 'layout.html' %}
 
+{% block title %} 글목록 {% endblock title %}
 
+{% block contents %}
+<h1>글목록</h1>
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th>글번호</th>
+            <th>제목</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for post in object_list %}
+            <tr>
+                <td>{{post.pk}}</td>
+                <td>
+                    <a href="{% url 'board:detail' post.pk %}">
+                        {{post.title}}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
 
+</table>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- Paging 처리 -->
+{% if is_paginated %}
+  <ul class="pagination justify-content-center">
+    {% if has_previous %}
+      <li class="page-item">
+        <a href="{% url 'board:list' %}?page={{previous_page_no}}" class='page-link'>previous</a>
+      </li>
+    {% else %}
+      <li class="page-item">
+        <span class='page-link'>previous</span>
+      </li>
+    {% endif %}
+    <!-- 페이지 링크 -->
+    {% for page in page_range %}
+      <!-- page == 현재페이지번호(page_obj.number) -->
+      {% if page == page_obj.number %}
+        <li class='page-item active'>
+          <span class='page-link'>{{page}}</span>
+        </li>
+      {% else %}
+        <li class='page-item'>
+          <a href="{% url 'board:list' %}?page={{page}}" class='page-link'>{{page}}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+    <!-- 다음 페이지 그룹 이동 링크 -->
+    {% if has_next %}
+      <li class='page-item'>
+        <a href="{% url 'board:list' %}?page={{next_page_no}}" class='page-link'>next</a>
+      </li>
+    {% else %}
+      <li class='page-item'>
+        <span class='page-link'>next</span>
+      </li>
+    {% endif %}
+  <ul>
+{% endif %}
+    
+{% endblock contents %}
+```
