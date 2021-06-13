@@ -1,3 +1,32 @@
+# Event 처리
+- 자바 스크립트는 사요자의 요청처리를 Event 모델을 통해 처리한다.
+  - Event Source : Event가 발생한 컴포넌트
+  - Event => Event Source의 상태를 바꾸게 만드는 action(마우스로 버튼 클릭 등등)
+  - Event Handler : Event 발생 시 처리하는 코드를 등록하는 것
+  - Listener : Event Source에서 Event가 발생하는 것을 감시하다 발생 시 Handler 호출
+```html
+<input type='button' value='확인' onclick="alert('button클릭')"/>
+<form action='a.jsp' onsubmit="alert('전송합니다')">
+```
+## 주요 Event와 Handler
+| Event | Handler | 설명 |
+| -- | -- | -- |
+| load | onload | 해당 페이지가 로딩 되었을 때(처음 읽힐 때) 발생 |
+| blur | onfocus | 입력 양식을 선택해서 포커스가 주어졌을 때 |
+| change | onchange | 입력 양식 select에서 선택 item이 바뀌었을 때 |
+| mousemove | onmousemove | 해당 영역에 마우스를 움직였을 때 발생 |
+| mouseover | onmouseover | 해당 영역에마우스가 올라갔을 때 발생 |
+| mouseout | onmouseout | 해당 영역에서 마우스가 나갔을 떄 발생 |
+| mousedown | onmousedown | 해당 영역에서 마우스버튼을 눌렀을 때 발생 |
+| mouseup | onmouseup | 해당 영역에서 누르던 마우스버튼을 떼었을 때 발생 |
+| click | onclick | 해당 영역에서 마우스를 클릭 했을 때 발생 |
+| keydown | onkeydown | 해당 영역에서 키보드를 눌렀을 때 발생 |
+| keyup | onkeyup | 해당 영역에서 누르고 있던 키보드를 떼었을 때 발생 |
+| keypress | onkeypress | 해당 영역에서 키보드를 계속 누르고 있을 때 발생 |
+| submit | onsubmit | 폼의 내용을 전송 할 때 발생 |
+| reset | onreset | 폼의 내용을 초기화 시킬 때 |
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,3 +139,4 @@
     </form>
 </body>
 </html>
+```
