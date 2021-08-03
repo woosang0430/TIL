@@ -176,34 +176,17 @@ class NodeMgmt:
 
 #### REVIEW
 ```python
-class Node:
+class Node():
     def __init__(self, value):
         self.value = value
         self.left = None
         self.right = None
-    
-class NodeMgmt:
+
+class BST():
     def __init__(self, head):
         self.head = head
+        self.count = {}
     
-    def insert(self, value):
-        self.current_node = self.head
-        
-        while True:
-            if value < self.current_node.value:
-                if self.current_node.left != None:
-                    self.current_node = self.current_node.left
-                else:
-                    self.current_node = Node(value)
-                    break
-                
-            elif self.current_node.value < value:
-                if self.current_node.right != None:
-                    self.current_node = self.current_node.right
-                else:
-                    self.current_node.right = Node(value)
-                    break
-
     def search(self, value):
         self.current_node = self.head
         while self.current_node != None:
@@ -213,13 +196,35 @@ class NodeMgmt:
                 self.current_node = self.current_node.left
             else:
                 self.current_node = self.current_node.right
-            return False
-        
+        return False
+    
+    def insert(self, value):
+        self.current_node = self.head
+        while True:
+            if value < self.current_node.value:
+                if self.current_node.left != None:
+                    self.current_node = self.current_node.left
+                else:
+                    self.current_node.left = Node(value)
+                    break
+            elif self.current_node.value < value:
+                if self.current_node.right != None:
+                    self.current_node = self.current_node.right
+                else:
+                    self.current_node.right = Node(value)
+                    break
+            else:
+                key = self.current_node.value
+                if self.count.get(key) == None:
+                    self.count[key] = 0
+                else:
+                    self.count[key] += 1
+
     def delete(self, value):
         searched = False
         self.current_node = self.head
         self.parent = self.head
-        
+
         while self.current_node != None:
             if self.current_node.value == value:
                 searched = True
@@ -230,7 +235,7 @@ class NodeMgmt:
             else:
                 self.parent = self.current_node
                 self.current_node = self.current_node.right
-                
+
         if searched == False:
             return False
         
@@ -240,7 +245,7 @@ class NodeMgmt:
                 self.parent.left = None
             else:
                 self.parent.right = None
-                
+
         # case2
         elif self.current_node.left != None and self.current_node.right == None:
             if value < self.parent.value:
@@ -252,44 +257,42 @@ class NodeMgmt:
                 self.parent.left = self.current_node.right
             else:
                 self.parent.right = self.current_node.right
-            
+
         # case3
-        elif self.current_node.left != None and self.current_noe.right != None:
-            # case3-1
-            if value < self.parent.value:
+        elif self.current_node.left != None and self.current_node.right != None:
+            if value < self.current_node.value:
                 self.change_node = self.current_node.right
                 self.change_node_parent = self.current_node.right
-                    
-                while self.change_node.left != None:
-                    self.change_node_parent = self.change_node
-                    self.change_node = self.current_node.left
-                    
-                    if self.change_node.right != None:
-                        self.change_node_parent.left = self.change_node.right
-                    else:
-                        self.change_node_parent.left = None
-                    
+
+                while self.change_node != None:
+                    self.chage_node_parent = self.change_node
+                    self.chage_node = self.change_node.left
+
+                if self.chage_node.right != None:
+                    self.change_node_parent.left = self.chage_node.right
+                else:
+                    self.change_node_parent.left = None
+
                 self.parent.left = self.change_node
                 self.change_node.left = self.current_node.left
-                self.change_node.right = self.current_node.right
-            # case3-2
+                self.change_node.right = self.change_node_parent
             else:
                 self.change_node = self.current_node.right
                 self.change_node_parent = self.current_node.right
-                
+
                 while self.change_node != None:
                     self.change_node_parent = self.change_node
-                    self.change_node = self.current_node.left
-                    
-                    if self.change_node.right != None:
-                        self.change_node_parent.left = self.change_node.right
-                    else:
-                        self.change_node_parent.left = None
+                    self.change_node = self.change_node.left
+
+                if self.change_node.right != None:
+                    self.change_node_parent.left = self.change_node.right
+                else:
+                    self.change_node_parent.left = None
                 
                 self.parent.right = self.change_node
                 self.change_node.left = self.current_node.left
-                self.change_node.right = self.current_node.right
-                
+                self.change_node.right = self.change_node_parent
+
         return True
 
 # test
