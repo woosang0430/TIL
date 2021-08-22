@@ -59,3 +59,13 @@ github_test git init
 -------------------
 - `git checkout` : 브랜치 이동
 > - `git checkout -b <new branch name>` 브랜치를 생성하고 전환까지
+  
+  
+## git stash
+-------
+- 작업하던거 임시저장소로 저장
+- 마지막 pull 받았던 지점으로 이동
+  
+## git stach pop
+--------
+- 임시저장소에 저장된 마지막 작업 불러오기
