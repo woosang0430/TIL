@@ -66,6 +66,6 @@ github_test git init
 - 작업하던거 임시저장소로 저장
 - 마지막 pull 받았던 지점으로 이동
   
-## git stach pop
+## git stash pop
 --------
 - 임시저장소에 저장된 마지막 작업 불러오기
