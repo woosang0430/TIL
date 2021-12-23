@@ -31,6 +31,17 @@ github_test git init
 > - `-m` 뒤에는 메시지를 작성한다.
 > - commit을 하면 working tree는 비워진다.
 > - 원격 저장소와 로컬 저장소 연결 과정만 남음
+  
+## git commit --amend
+----
+- 기존에 커밋은 했는데 수정한 부분이나 같이 올리지 못한 파일이 있는 경우 사용
+- 실행하면 에디터가 나온다.
+- 마지막 커밋 메시지 수정
+```bash
+$ git add amend.txt
+$ git commit --amend
+```
+- 이때, 혼자 사용하는 것이 아닌 여러명이 사용하는 브랜치인 경우는 히스토리가 꼬일수도 있으므로 조심해 주셔야 합니다.
 
 ## git remote add origin
 -------------------
